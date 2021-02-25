@@ -1,5 +1,7 @@
 use std::ops;
 
+use crate::common::Point;
+
 /// Standard 3D Vector
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub struct Vector {
@@ -8,10 +10,18 @@ pub struct Vector {
     pub z: f64,
 }
 
+/// Standard vector constructors
 impl Vector {
-    /// Standard vector constructor
     pub fn new(x: f64, y: f64, z: f64) -> Vector {
         Vector { x, y, z }
+    }
+
+    pub fn from(src: Point, dst: Point) -> Vector {
+        Vector {
+            x: dst.0 - src.0,
+            y: dst.1 - src.1,
+            z: dst.2 - src.2,
+        }
     }
 }
 
