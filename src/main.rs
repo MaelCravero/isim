@@ -1,6 +1,7 @@
 mod common;
 mod geometry;
 mod image;
+mod scene;
 
 use std::fs::File;
 use std::path::Path;
