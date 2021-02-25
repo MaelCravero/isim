@@ -1,3 +1,4 @@
+mod ray;
 mod texture;
 
 use crate::common::Point;
