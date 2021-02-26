@@ -39,6 +39,13 @@ impl ops::Sub<Vector> for Vector {
     }
 }
 
+impl ops::Neg for Vector {
+    type Output = Vector;
+    fn neg(self) -> Vector {
+        Vector::new(-self.x, -self.y, -self.z)
+    }
+}
+
 impl ops::Mul<f64> for Vector {
     type Output = Vector;
     fn mul(self, v: f64) -> Vector {
