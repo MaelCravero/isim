@@ -5,8 +5,9 @@ mod sphere;
 mod texture;
 
 use crate::{common::Point, geometry::Vector};
-use ray::Ray;
 
+pub use camera::Camera;
+pub use ray::Ray;
 pub use scene::Scene;
 
 pub trait TextureMaterial {
