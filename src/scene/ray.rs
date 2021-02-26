@@ -4,7 +4,7 @@ use crate::{
 };
 
 pub struct Ray {
-    color: Color,
-    origin: Point,
-    direction: Vector,
+    pub color: Color,
+    pub origin: Point,
+    pub direction: Vector,
 }
