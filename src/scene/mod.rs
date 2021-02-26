@@ -1,9 +1,13 @@
+mod camera;
 mod ray;
+mod scene;
 mod sphere;
 mod texture;
 
 use crate::{common::Point, geometry::Vector};
 use ray::Ray;
+
+pub use scene::Scene;
 
 pub trait TextureMaterial {
     fn diffusion(&self, p: Point) -> (f64, f64, f64);
