@@ -1,5 +1,5 @@
 use crate::{
-    common::{Color, Point, ORIGIN},
+    common::{Point, ORIGIN},
     geometry::Vector,
 };
 
