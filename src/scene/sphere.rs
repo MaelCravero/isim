@@ -25,13 +25,30 @@ impl<T> Object for Sphere<T>
 where
     T: TextureMaterial,
 {
-    fn intersects(&self, ray: Ray) -> bool {
+    fn intersects(&self, ray: Ray) -> Option<f64> {
         let v = Vector::from(self.center, ray.origin);
         let a = Vector::dot_product(&ray.direction, &ray.direction);
         let b = 2.0 * Vector::dot_product(&v, &ray.direction);
         let c = Vector::dot_product(&v, &v) - self.radius * self.radius;
 
-        return (b * b - 4.0 * a * c) / (2.0 * a) >= 0.0;
+        let delta = (b * b - 4.0 * a * c) / (2.0 * a);
+
+        if delta >= 0.0 {
+            let x1 = (-b + delta.sqrt()) / (2.0 * a);
+            let x2 = (-b + delta.sqrt()) / (2.0 * a);
+
+            // We want the shortest distance
+            let (min, max) = if x1 < x2 { (x1, x2) } else { (x2, x1) };
+            if min < 0.0 && max < 0.0 {
+                None
+            } else if min > 0.0 {
+                Some(min)
+            } else {
+                Some(max) // If the camera is inside an object
+            }
+        } else {
+            None
+        }
     }
 
     fn normal(&self, p: Point) -> Vector {
@@ -49,7 +66,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::common::{Color, ORIGIN, WHITE};
+    use crate::common::{ORIGIN, WHITE};
     use crate::scene::texture::UniformTexture;
 
     use super::*;
@@ -68,7 +85,7 @@ mod tests {
             direction: Vector::new(1.0, 0.0, 0.0),
         };
 
-        assert!(s.intersects(ray))
+        assert!(s.intersects(ray).is_some())
     }
 
     #[test]
@@ -85,6 +102,6 @@ mod tests {
             direction: Vector::new(1.0, 0.0, 0.0),
         };
 
-        assert!(!s.intersects(ray))
+        assert!(s.intersects(ray).is_none())
     }
 }

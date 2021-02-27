@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::{
     common::Color,
     geometry::Vector,
@@ -35,14 +37,25 @@ impl Engine {
             direction,
         };
 
+        // f64 is not hashable so we use u64 and convert f64 using to_bits
+        let mut intersections = HashMap::<u64, Color>::new();
+
         for obj in self.scene.objects.iter() {
-            if obj.intersects(ray) {
+            if let Some(d) = obj.intersects(ray) {
                 let (r, g, b) = obj.diffusion(crate::common::ORIGIN);
                 let c = Color(r as u8, g as u8, b as u8);
-                return Some(c);
+                intersections.insert(d.to_bits(), c);
             }
         }
 
-        None
+        if intersections.is_empty() {
+            None
+        } else {
+            let min = intersections
+                .keys()
+                .map(|bits| f64::from_bits(bits.clone()))
+                .fold(f64::MAX, |acc, x| if acc > x { x } else { acc });
+            intersections.get(&min.to_bits()).map(|c| c.clone())
+        }
     }
 }

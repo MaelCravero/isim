@@ -17,7 +17,7 @@ pub trait TextureMaterial {
 }
 
 pub trait Object {
-    fn intersects(&self, ray: Ray) -> bool;
+    fn intersects(&self, ray: Ray) -> Option<f64>;
     fn normal(&self, p: Point) -> Vector;
     fn diffusion(&self, p: Point) -> (f64, f64, f64);
     fn specularity(&self, p: Point) -> f64;
