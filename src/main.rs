@@ -32,15 +32,30 @@ fn main() {
         common::ORIGIN,
         Point(0.0, 0.0, 1.0),
         Vector::new(1.0, 0.0, 0.0),
-        80.0,
-        80.0,
+        90.0,
+        90.0,
         5.0,
-        400,
-        600,
+        700,
+        700,
     );
 
-    let scene = scene::Scene::new(cam, Vec::<Box<dyn scene::Object>>::new());
-    let image = engine::render(scene);
+    let mut objs = Vec::<Box<dyn scene::Object>>::new();
+    let texture = scene::texture::UniformTexture::new(common::RED, 1.0, 1.0);
+    objs.push(Box::new(
+        scene::Sphere::<scene::texture::UniformTexture>::new(Point(0.0, 0.0, 6.0), 1.0, texture),
+    ));
+    let texture = scene::texture::UniformTexture::new(common::BLUE, 1.0, 1.0);
+    objs.push(Box::new(
+        scene::Sphere::<scene::texture::UniformTexture>::new(Point(1.0, 1.0, 7.0), 1.0, texture),
+    ));
+    let texture = scene::texture::UniformTexture::new(common::GREEN, 1.0, 1.0);
+    objs.push(Box::new(
+        scene::Sphere::<scene::texture::UniformTexture>::new(Point(0.0, 0.0, 8.0), 4.0, texture),
+    ));
+
+    let scene = scene::Scene::new(cam, objs);
+    let engine = engine::Engine::new(scene);
+    let image = engine.render();
 
     save_image(&args[1], image)
 }

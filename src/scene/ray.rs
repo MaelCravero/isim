@@ -3,6 +3,7 @@ use crate::{
     geometry::Vector,
 };
 
+#[derive(Clone, Copy, Debug)]
 pub struct Ray {
     pub color: Color,
     pub origin: Point,
