@@ -44,13 +44,23 @@ fn main() {
     objs.push(Box::new(
         scene::Sphere::<scene::texture::UniformTexture>::new(Point(0.0, 0.0, 6.0), 1.0, texture),
     ));
+    let texture = scene::texture::UniformTexture::new(common::GREEN, 1.0, 1.0);
+    objs.push(Box::new(
+        scene::Sphere::<scene::texture::UniformTexture>::new(Point(0.0, 0.0, 8.0), 4.0, texture),
+    ));
     let texture = scene::texture::UniformTexture::new(common::BLUE, 1.0, 1.0);
     objs.push(Box::new(
         scene::Sphere::<scene::texture::UniformTexture>::new(Point(1.0, 1.0, 7.0), 1.0, texture),
     ));
-    let texture = scene::texture::UniformTexture::new(common::GREEN, 1.0, 1.0);
+    let texture = scene::texture::UniformTexture::new(common::WHITE, 1.0, 1.0);
     objs.push(Box::new(
-        scene::Sphere::<scene::texture::UniformTexture>::new(Point(0.0, 0.0, 8.0), 4.0, texture),
+        scene::Sphere::<scene::texture::UniformTexture>::new(Point(-1.0, -4.0, 5.0), 1.0, texture),
+    ));
+
+    // "Skybox"
+    let texture = scene::texture::UniformTexture::new(Color(135, 206, 235), 1.0, 1.0);
+    objs.push(Box::new(
+        scene::Sphere::<scene::texture::UniformTexture>::new(common::ORIGIN, 1000.0, texture),
     ));
 
     let scene = scene::Scene::new(cam, objs);
