@@ -12,7 +12,7 @@ impl<T> Sphere<T>
 where
     T: TextureMaterial,
 {
-    fn new(center: Point, radius: f64, texture: T) -> Sphere<T> {
+    pub fn new(center: Point, radius: f64, texture: T) -> Sphere<T> {
         Sphere {
             center,
             radius,
