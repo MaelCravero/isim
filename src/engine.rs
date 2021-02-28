@@ -11,17 +11,40 @@ use crate::{
 enum RenderingMode {
     Intersect,
     Diffuse,
+    Specular,
 }
 
 pub struct Engine {
     scene: Scene,
-    mode: RenderingMode,
+    mode: Vec<RenderingMode>,
 }
 
 impl Engine {
     pub fn new(scene: Scene) -> Engine {
-        let mode = RenderingMode::Diffuse;
-        Engine { scene, mode }
+        Engine {
+            scene,
+            mode: Vec::new(),
+        }
+    }
+
+    pub fn reset_mode(&mut self) -> &mut Self {
+        self.mode = Vec::new();
+        self
+    }
+
+    pub fn set_intersect(&mut self) -> &mut Self {
+        self.mode.push(RenderingMode::Intersect);
+        self
+    }
+
+    pub fn set_diffuse(&mut self) -> &mut Self {
+        self.mode.push(RenderingMode::Diffuse);
+        self
+    }
+
+    pub fn set_specular(&mut self) -> &mut Self {
+        self.mode.push(RenderingMode::Specular);
+        self
     }
 
     pub fn render(&self) -> Image {
@@ -64,21 +87,51 @@ impl Engine {
         Color(ir as u8, ig as u8, ib as u8)
     }
 
-    fn process_point(&self, pos: Point, obj: &Box<dyn Object>) -> Color {
+    fn process_reflection(
+        light_vector: Vector,
+        light_intensity: (f64, f64, f64),
+        reflection: f64,
+        reflected: Vector,
+    ) -> Color {
+        // I = k * (S.L)^ns * I_l
+        let (lr, lg, lb) = light_intensity;
+        let mean_intensity = lr / 3.0 + lg / 3.0 + lb / 3.0;
+
+        let ns = 1.8;
+        let i = (reflection
+            * Vector::dot_product(&light_vector, &reflected).powf(ns)
+            * mean_intensity) as u8;
+        //* (u8::MAX as f64)) as u8;
+
+        Color(i, i, i)
+    }
+
+    fn process_point(&self, pos: Point, obj: &Box<dyn Object>, ray: &Ray) -> Color {
         let mut c = crate::common::BLACK;
         let normal = obj.normal(pos);
 
+        let reflected =
+            ray.direction - normal * 2.0 * (Vector::dot_product(&normal, &ray.direction));
+
         for light in self.scene.lights.iter() {
             let light_vector = Vector::from(pos, light.pos()); // FIXME
-            c += match self.mode {
-                RenderingMode::Intersect => Engine::process_hit(obj.diffusion(pos)),
-                RenderingMode::Diffuse => Engine::process_diffusion(
-                    light_vector,
-                    light.intensity(),
-                    obj.diffusion(pos),
-                    normal,
-                ),
-            };
+            for mode in self.mode.iter() {
+                c += match mode {
+                    RenderingMode::Intersect => Engine::process_hit(obj.diffusion(pos)),
+                    RenderingMode::Diffuse => Engine::process_diffusion(
+                        light_vector,
+                        light.intensity(),
+                        obj.diffusion(pos),
+                        normal,
+                    ),
+                    RenderingMode::Specular => Engine::process_reflection(
+                        light_vector,
+                        light.intensity(),
+                        obj.specularity(pos),
+                        reflected,
+                    ),
+                };
+            }
         }
 
         c
@@ -120,6 +173,6 @@ impl Engine {
 
         let closest: &Box<dyn Object> = intersections.get(&min.to_bits()).unwrap();
 
-        Some(self.process_point(intersection_point, closest))
+        Some(self.process_point(intersection_point, closest, &ray))
     }
 }
