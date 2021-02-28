@@ -35,8 +35,8 @@ fn main() {
         90.0,
         90.0,
         5.0,
-        700,
-        700,
+        400,
+        400,
     );
 
     let mut objs = Vec::<Box<dyn scene::Object>>::new();
@@ -54,7 +54,7 @@ fn main() {
     ));
     let texture = scene::texture::UniformTexture::new(common::WHITE, 1.0, 1.0);
     objs.push(Box::new(
-        scene::Sphere::<scene::texture::UniformTexture>::new(Point(-1.0, -4.0, 5.0), 1.0, texture),
+        scene::Sphere::<scene::texture::UniformTexture>::new(Point(-3.0, -3.0, 6.0), 1.0, texture),
     ));
 
     // "Skybox"
