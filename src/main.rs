@@ -63,7 +63,13 @@ fn main() {
         scene::Sphere::<scene::texture::UniformTexture>::new(common::ORIGIN, 1000.0, texture),
     ));
 
-    let scene = scene::Scene::new(cam, objs);
+    let mut lights = Vec::<Box<dyn scene::Light>>::new();
+    lights.push(Box::new(scene::light::PointLight::new(
+        Point(4.0, 4.0, 6.0),
+        (1.0, 1.0, 1.0),
+    )));
+
+    let scene = scene::Scene::new(cam, lights, objs);
     let engine = engine::Engine::new(scene);
     let image = engine.render();
 

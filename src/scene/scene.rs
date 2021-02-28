@@ -1,13 +1,17 @@
-use super::{Camera, Object};
+use super::{Camera, Light, Object};
 
 pub struct Scene {
     pub cam: Camera,
-    //lights: HashSet<>, TODO
+    pub lights: Vec<Box<dyn Light>>,
     pub objects: Vec<Box<dyn Object>>,
 }
 
 impl Scene {
-    pub fn new(cam: Camera, objects: Vec<Box<dyn Object>>) -> Scene {
-        Scene { cam, objects }
+    pub fn new(cam: Camera, lights: Vec<Box<dyn Light>>, objects: Vec<Box<dyn Object>>) -> Scene {
+        Scene {
+            cam,
+            lights,
+            objects,
+        }
     }
 }

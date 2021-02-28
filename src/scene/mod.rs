@@ -1,4 +1,5 @@
 mod camera;
+pub mod light;
 mod ray;
 mod scene;
 mod sphere;
@@ -21,4 +22,9 @@ pub trait Object {
     fn normal(&self, p: Point) -> Vector;
     fn diffusion(&self, p: Point) -> (f64, f64, f64);
     fn specularity(&self, p: Point) -> f64;
+}
+
+pub trait Light {
+    fn pos(&self) -> Point;
+    fn intensity(&self) -> (f64, f64, f64);
 }
