@@ -52,7 +52,7 @@ where
     }
 
     fn normal(&self, p: Point) -> Vector {
-        unimplemented!()
+        Vector::from(self.center, p).normalize()
     }
 
     fn diffusion(&self, p: Point) -> (f64, f64, f64) {
