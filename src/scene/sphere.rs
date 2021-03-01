@@ -80,7 +80,7 @@ mod tests {
         );
 
         let ray = Ray {
-            color: WHITE,
+            energy: 1.0,
             origin: ORIGIN,
             direction: Vector::new(1.0, 0.0, 0.0),
         };
@@ -97,7 +97,7 @@ mod tests {
         );
 
         let ray = Ray {
-            color: WHITE,
+            energy: 1.0,
             origin: ORIGIN,
             direction: Vector::new(1.0, 0.0, 0.0),
         };

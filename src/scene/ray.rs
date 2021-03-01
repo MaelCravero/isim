@@ -1,11 +1,8 @@
-use crate::{
-    common::{Color, Point},
-    geometry::Vector,
-};
+use crate::{common::Point, geometry::Vector};
 
 #[derive(Clone, Copy, Debug)]
 pub struct Ray {
-    pub color: Color,
+    pub energy: f64,
     pub origin: Point,
     pub direction: Vector,
 }
