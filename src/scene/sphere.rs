@@ -35,7 +35,7 @@ where
 
         if delta >= 0.0 {
             let x1 = (-b + delta.sqrt()) / (2.0 * a);
-            let x2 = (-b + delta.sqrt()) / (2.0 * a);
+            let x2 = (-b - delta.sqrt()) / (2.0 * a);
 
             // We want the shortest distance
             let (min, max) = if x1 < x2 { (x1, x2) } else { (x2, x1) };

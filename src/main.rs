@@ -48,15 +48,18 @@ fn main() {
     ));
 
     lights.push(Box::new(scene::light::PointLight::new(
-        Point(0.0, 0.0, 0.0),
+        Point(0.0, 0.0, 5.0),
         (1.0, 1.0, 1.0),
     )));
 
     let scene = scene::Scene::new(cam, lights, objs);
 
     let mut engine = engine::Engine::new(scene);
+    let mut engine = engine::Engine::new(scene1::get());
 
-    engine.set_diffuse().set_specular();
+    engine.set_diffuse();
+    engine.set_specular();
+    //engine.set_intersect();
 
     let image = engine.render();
 

@@ -97,11 +97,13 @@ impl Engine {
         let (lr, lg, lb) = light_intensity;
         let mean_intensity = lr / 3.0 + lg / 3.0 + lb / 3.0;
 
-        let ns = 1.8;
-        let i = (reflection
-            * Vector::dot_product(&light_vector, &reflected).powf(ns)
-            * mean_intensity) as u8;
-        //* (u8::MAX as f64)) as u8;
+        let ns = 1.0;
+        let dot = Vector::dot_product(&light_vector.normalize(), &reflected.normalize());
+        if dot < 0.0 {
+            return Color(0, 0, 0);
+        }
+
+        let i = (reflection * dot.powf(ns) * mean_intensity * (u8::MAX as f64)) as u8;
 
         Color(i, i, i)
     }
@@ -114,7 +116,7 @@ impl Engine {
             ray.direction - normal * 2.0 * (Vector::dot_product(&normal, &ray.direction));
 
         for light in self.scene.lights.iter() {
-            let light_vector = Vector::from(pos, light.pos()); // FIXME
+            let light_vector = Vector::from(pos, light.pos());
             for mode in self.mode.iter() {
                 c += match mode {
                     RenderingMode::Intersect => Engine::process_hit(obj.diffusion(pos)),
