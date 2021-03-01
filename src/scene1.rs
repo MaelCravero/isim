@@ -1,6 +1,6 @@
 use crate::*;
 
-pub fn get() -> scene::Scene {
+pub fn get(res_x: usize, res_y: usize) -> scene::Scene {
     let cam = scene::Camera::new(
         Point(0.0, 0.0, 0.0),
         Point(0.0, 0.0, 8.0),
@@ -8,8 +8,8 @@ pub fn get() -> scene::Scene {
         90.0,
         90.0,
         2.0,
-        400,
-        400,
+        res_x,
+        res_y,
     );
 
     let mut objs = Vec::<Box<dyn scene::Object>>::new();
@@ -25,16 +25,16 @@ pub fn get() -> scene::Scene {
     objs.push(Box::new(
         scene::Sphere::<scene::texture::UniformTexture>::new(Point(0.0, 0.0, 9.0), 4.0, texture),
     ));
-    let texture = scene::texture::UniformTexture::new(common::BLUE, 1.0, 1.0);
+    let texture = scene::texture::UniformTexture::new(common::BLUE, 1.0, 1.3);
     objs.push(Box::new(
-        scene::Sphere::<scene::texture::UniformTexture>::new(Point(1.0, 1.0, 7.0), 1.0, texture),
+        scene::Sphere::<scene::texture::UniformTexture>::new(Point(1.0, 1.0, 6.3), 0.7, texture),
     ));
     let texture = scene::texture::UniformTexture::new(common::WHITE, 1.0, 1.0);
     objs.push(Box::new(
         scene::Sphere::<scene::texture::UniformTexture>::new(Point(-3.3, -3.3, 6.0), 1.0, texture),
     ));
 
-    // "Skybox"
+    //"Skybox"
     let texture = scene::texture::UniformTexture::new(Color(135, 206, 235), 1.0, 0.0);
     objs.push(Box::new(
         scene::Sphere::<scene::texture::UniformTexture>::new(common::ORIGIN, 1000.0, texture),

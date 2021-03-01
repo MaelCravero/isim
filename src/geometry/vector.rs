@@ -77,6 +77,10 @@ impl Vector {
         let norm = (self.x * self.x + self.y * self.y + self.z * self.z).sqrt();
         self / norm
     }
+
+    pub fn to_point(self) -> Point {
+        Point(self.x, self.y, self.z)
+    }
 }
 
 #[cfg(test)]
