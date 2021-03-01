@@ -23,7 +23,7 @@ pub fn get() -> scene::Scene {
     ));
     let texture = scene::texture::UniformTexture::new(common::GREEN, 1.0, 1.0);
     objs.push(Box::new(
-        scene::Sphere::<scene::texture::UniformTexture>::new(Point(0.0, 0.0, 8.0), 4.0, texture),
+        scene::Sphere::<scene::texture::UniformTexture>::new(Point(0.0, 0.0, 9.0), 4.0, texture),
     ));
     let texture = scene::texture::UniformTexture::new(common::BLUE, 1.0, 1.0);
     objs.push(Box::new(
@@ -41,15 +41,15 @@ pub fn get() -> scene::Scene {
     ));
 
     let mut lights = Vec::<Box<dyn scene::Light>>::new();
-    //lights.push(Box::new(scene::light::PointLight::new(
-    //Point(4.0, 4.0, 6.0),
-    //(1.0, 1.0, 1.0),
-    //)));
-
     lights.push(Box::new(scene::light::PointLight::new(
-        Point(-4.0, -4.0, 0.0),
+        Point(4.0, 4.0, 6.0),
         (1.0, 1.0, 1.0),
     )));
+
+    //lights.push(Box::new(scene::light::PointLight::new(
+    //Point(-4.0, -4.0, 3.0),
+    //(1.0, 1.0, 1.0),
+    //)));
 
     scene::Scene::new(cam, lights, objs)
 }
