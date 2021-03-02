@@ -35,10 +35,10 @@ pub fn get(res_x: usize, res_y: usize) -> scene::Scene {
     ));
 
     //"Skybox"
-    let texture = scene::texture::UniformTexture::new(Color(135, 206, 235), 1.0, 0.0);
-    objs.push(Box::new(
-        scene::Sphere::<scene::texture::UniformTexture>::new(common::ORIGIN, 1000.0, texture),
-    ));
+    //let texture = scene::texture::UniformTexture::new(Color(135, 206, 235), 1.0, 0.0);
+    //objs.push(Box::new(
+    //scene::Sphere::<scene::texture::UniformTexture>::new(common::ORIGIN, 1000.0, texture),
+    //));
 
     let mut lights = Vec::<Box<dyn scene::Light>>::new();
     lights.push(Box::new(scene::light::PointLight::new(

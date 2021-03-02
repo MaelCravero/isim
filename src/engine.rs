@@ -146,7 +146,7 @@ impl Engine {
         )
     }
 
-    fn process_point(&self, pos: Point, obj: &Box<dyn Object>, ray: &Ray) -> Color {
+    fn process_point(&self, pos: Point, obj: &Box<dyn Object>, ray: &Ray, distance: f64) -> Color {
         let mut c = crate::common::BLACK;
         let normal = obj.normal(pos);
 
@@ -158,6 +158,19 @@ impl Engine {
         let epsilon_pos = (Vector::from(ORIGIN, pos) + reflected.normalize() * epsilon).to_point();
 
         for light in self.scene.lights.iter() {
+            let mut in_shadow = false;
+            for obj in self.scene.objects.iter() {
+                if let Some(d) = obj.intersects(ray.clone()) {
+                    if d < distance {
+                        in_shadow = true;
+                        break;
+                    }
+                }
+            }
+            if in_shadow {
+                continue;
+            }
+
             let light_vector = Vector::from(pos, light.pos());
             for mode in self.mode.iter() {
                 c += match mode {
@@ -228,6 +241,6 @@ impl Engine {
 
         let closest: &Box<dyn Object> = intersections.get(&min.to_bits()).unwrap();
 
-        Some(self.process_point(intersection_point, closest, &ray))
+        Some(self.process_point(intersection_point, closest, &ray, min))
     }
 }
