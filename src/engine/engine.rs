@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 
 use crate::{
-    common::Color,
-    common::{Point, ORIGIN},
-    geometry::Vector,
+    common::*,
     image::Image,
     scene::{Object, Ray, Scene},
 };
+
+use super::render::*;
 
 enum RenderingMode {
     Intersect,
@@ -80,72 +80,6 @@ impl Engine {
         res
     }
 
-    fn process_hit(diffusion: (f64, f64, f64)) -> Color {
-        let (r, g, b) = diffusion;
-        Color(r as u8, g as u8, b as u8)
-    }
-
-    fn process_diffusion(
-        light_vector: Vector,
-        light_intensity: (f64, f64, f64),
-        diffusion: (f64, f64, f64),
-        normal: Vector,
-    ) -> Color {
-        // I = k * (N.L) * I_l
-        let (kr, kg, kb) = diffusion;
-        let (lr, lg, lb) = light_intensity;
-
-        let proportion = Vector::dot_product(&normal, &light_vector.normalize());
-
-        if proportion < 0.0 {
-            return crate::common::BLACK;
-        }
-
-        let ir = kr * proportion * lr;
-        let ig = kg * proportion * lg;
-        let ib = kb * proportion * lb;
-
-        Color(ir as u8, ig as u8, ib as u8)
-    }
-
-    fn process_specularity(
-        light_vector: Vector,
-        light_intensity: (f64, f64, f64),
-        reflection: f64,
-        reflected: Vector,
-    ) -> Color {
-        // I = k * (S.L)^ns * I_l
-        let (lr, lg, lb) = light_intensity;
-        let mean_intensity = lr / 3.0 + lg / 3.0 + lb / 3.0;
-
-        let ns = 3.0;
-        let dot = Vector::dot_product(&light_vector.normalize(), &reflected.normalize());
-        if dot < 0.0 {
-            return Color(0, 0, 0);
-        }
-
-        let i = (reflection * dot.powf(ns) * mean_intensity * (u8::MAX as f64)) as u8;
-
-        Color(i, i, i)
-    }
-
-    fn process_ambient(
-        light_intensity: (f64, f64, f64),
-        ambient_light: (f64, f64, f64),
-        diffusion: (f64, f64, f64),
-    ) -> Color {
-        let (lr, lg, lb) = light_intensity;
-        let (ar, ag, ab) = ambient_light;
-        let (r, g, b) = diffusion;
-        let (kr, kg, kb) = (r as f64, g as f64, b as f64);
-
-        Color(
-            (lr * ar * kr) as u8,
-            (lg * ag * kg) as u8,
-            (lb * ab * kb) as u8,
-        )
-    }
-
     fn process_point(&self, pos: Point, obj: &Box<dyn Object>, ray: &Ray, distance: f64) -> Color {
         let mut c = crate::common::BLACK;
         let normal = obj.normal(pos);
@@ -174,24 +108,22 @@ impl Engine {
             let light_vector = Vector::from(pos, light.pos());
             for mode in self.mode.iter() {
                 c += match mode {
-                    RenderingMode::Intersect => Engine::process_hit(obj.diffusion(pos)),
-                    RenderingMode::Diffuse => Engine::process_diffusion(
+                    RenderingMode::Intersect => intersection::process(obj.diffusion(pos)),
+                    RenderingMode::Diffuse => diffusion::process(
                         light_vector,
                         light.intensity(),
                         obj.diffusion(pos),
                         normal,
                     ),
-                    RenderingMode::Specular => Engine::process_specularity(
+                    RenderingMode::Specular => specularity::process(
                         light_vector,
                         light.intensity(),
                         obj.specularity(pos),
                         reflected,
                     ),
-                    RenderingMode::Ambient(ambient_light) => Engine::process_ambient(
-                        light.intensity(),
-                        *ambient_light,
-                        obj.diffusion(pos),
-                    ),
+                    RenderingMode::Ambient(ambient_light) => {
+                        ambient::process(light.intensity(), *ambient_light, obj.diffusion(pos))
+                    }
                     RenderingMode::Reflection => {
                         let loss = 0.7;
                         let energy = ray.energy - loss;
