@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{
     common::*,
     image::Image,
-    scene::{Object, Ray, Scene},
+    scene::{Light, Object, Ray, Scene},
 };
 
 use super::render::*;
@@ -80,7 +80,26 @@ impl Engine {
         res
     }
 
-    fn process_point(&self, pos: Point, obj: &Box<dyn Object>, ray: &Ray, distance: f64) -> Color {
+    fn in_shadow(&self, obj: &Box<dyn Object>, pos: Point, light: &Box<dyn Light>) -> bool {
+        let light_ray = Ray {
+            energy: 1.0,
+            origin: light.pos(),
+            direction: Vector::from(light.pos(), pos),
+        };
+
+        if let Some(distance_from_light) = obj.intersects(light_ray.clone()) {
+            for other in self.scene.objects.iter() {
+                if let Some(d) = other.intersects(light_ray.clone()) {
+                    if d < distance_from_light && (&*other as *const _ != &*obj as *const _) {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
+    }
+
+    fn process_point(&self, pos: Point, obj: &Box<dyn Object>, ray: &Ray) -> Color {
         let mut c = crate::common::BLACK;
         let normal = obj.normal(pos);
 
@@ -92,30 +111,19 @@ impl Engine {
         let epsilon_pos = (Vector::from(ORIGIN, pos) + reflected.normalize() * epsilon).to_point();
 
         for light in self.scene.lights.iter() {
-            let mut in_shadow = false;
-            for obj in self.scene.objects.iter() {
-                if let Some(d) = obj.intersects(ray.clone()) {
-                    if d < distance {
-                        in_shadow = true;
-                        break;
-                    }
-                }
-            }
-            if in_shadow {
-                continue;
-            }
+            let in_shadow = self.in_shadow(obj, pos, light);
 
             let light_vector = Vector::from(pos, light.pos());
             for mode in self.mode.iter() {
                 c += match mode {
                     RenderingMode::Intersect => intersection::process(obj.diffusion(pos)),
-                    RenderingMode::Diffuse => diffusion::process(
+                    RenderingMode::Diffuse if !in_shadow => diffusion::process(
                         light_vector,
                         light.intensity(),
                         obj.diffusion(pos),
                         normal,
                     ),
-                    RenderingMode::Specular => specularity::process(
+                    RenderingMode::Specular if !in_shadow => specularity::process(
                         light_vector,
                         light.intensity(),
                         obj.specularity(pos),
@@ -143,6 +151,7 @@ impl Engine {
                             crate::common::BLACK
                         }
                     }
+                    _ => crate::common::BLACK,
                 };
             }
         }
@@ -173,6 +182,6 @@ impl Engine {
 
         let closest: &Box<dyn Object> = intersections.get(&min.to_bits()).unwrap();
 
-        Some(self.process_point(intersection_point, closest, &ray, min))
+        Some(self.process_point(intersection_point, closest, &ray))
     }
 }
