@@ -37,6 +37,7 @@ impl Camera {
 
         let top_left =
             vec_center + vunit_y * (width as f64 / 2.0) + vunit_x * (height as f64 / 2.0);
+
         Camera {
             pos,
             z_min,
