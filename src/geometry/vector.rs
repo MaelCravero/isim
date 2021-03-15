@@ -73,9 +73,12 @@ impl Vector {
         )
     }
 
+    pub fn norm(self) -> f64 {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+
     pub fn normalize(self) -> Vector {
-        let norm = (self.x * self.x + self.y * self.y + self.z * self.z).sqrt();
-        self / norm
+        self / self.norm()
     }
 
     pub fn to_point(self) -> Point {
