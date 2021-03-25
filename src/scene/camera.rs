@@ -29,11 +29,13 @@ impl Camera {
 
         let unit_y = w / (width as f64);
         let unit_x = h / (height as f64);
-        let vunit_y =
-            Vector::cross_product(&up, &Vector::from(center_of_view, pos)).normalize() * unit_y;
+        let vunit_y = Vector::cross_product(&up, &Vector::from(center_of_view, pos))
+            .normalize()
+            .vector()
+            * unit_y;
         let vunit_x = up * unit_x;
 
-        let vec_center = Vector::from(ORIGIN, center_of_view).normalize() * z_min;
+        let vec_center = Vector::from(ORIGIN, center_of_view).normalize().vector() * z_min;
 
         let top_left =
             vec_center + vunit_y * (width as f64 / 2.0) + vunit_x * (height as f64 / 2.0);

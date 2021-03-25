@@ -1,4 +1,4 @@
-use crate::{common::Point, geometry::Vector};
+use crate::{common::Point, geometry::NormalVector, geometry::Vector};
 
 use super::{Object, Ray, TextureMaterial};
 
@@ -27,8 +27,8 @@ where
 {
     fn intersects(&self, ray: Ray) -> Option<f64> {
         let v = Vector::from(self.center, ray.origin);
-        let a = Vector::dot_product(&ray.direction, &ray.direction);
-        let b = 2.0 * Vector::dot_product(&v, &ray.direction);
+        let a = NormalVector::dot_product(&ray.direction, &ray.direction);
+        let b = 2.0 * Vector::dot_product(&v, &ray.direction.vector());
         let c = Vector::dot_product(&v, &v) - self.radius * self.radius;
 
         let delta = (b * b - 4.0 * a * c) / (2.0 * a);
@@ -51,7 +51,7 @@ where
         }
     }
 
-    fn normal(&self, p: Point) -> Vector {
+    fn normal(&self, p: Point) -> NormalVector {
         Vector::from(self.center, p).normalize()
     }
 
@@ -82,7 +82,7 @@ mod tests {
         let ray = Ray {
             energy: 1.0,
             origin: ORIGIN,
-            direction: Vector::new(1.0, 0.0, 0.0),
+            direction: Vector::new(1.0, 0.0, 0.0).normalize(),
         };
 
         assert!(s.intersects(ray).is_some())
@@ -99,7 +99,7 @@ mod tests {
         let ray = Ray {
             energy: 1.0,
             origin: ORIGIN,
-            direction: Vector::new(1.0, 0.0, 0.0),
+            direction: Vector::new(1.0, 0.0, 0.0).normalize(),
         };
 
         assert!(s.intersects(ray).is_none())

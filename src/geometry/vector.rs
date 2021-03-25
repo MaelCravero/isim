@@ -10,6 +10,9 @@ pub struct Vector {
     pub z: f64,
 }
 
+#[derive(PartialEq, Clone, Copy, Debug)]
+pub struct NormalVector(Vector);
+
 /// Standard vector constructors
 impl Vector {
     pub fn new(x: f64, y: f64, z: f64) -> Vector {
@@ -77,12 +80,22 @@ impl Vector {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
 
-    pub fn normalize(self) -> Vector {
-        self / self.norm()
+    pub fn normalize(self) -> NormalVector {
+        NormalVector(self / self.norm())
     }
 
     pub fn to_point(self) -> Point {
         Point(self.x, self.y, self.z)
+    }
+}
+
+impl NormalVector {
+    pub fn vector(&self) -> Vector {
+        return self.0;
+    }
+
+    pub fn dot_product(v1: &NormalVector, v2: &NormalVector) -> f64 {
+        Vector::dot_product(&v1.0, &v2.0)
     }
 }
 

@@ -84,7 +84,7 @@ impl Engine {
         let light_ray = Ray {
             energy: 1.0,
             origin: light.pos(),
-            direction: Vector::from(light.pos(), pos),
+            direction: Vector::from(light.pos(), pos).normalize(),
         };
 
         if let Some(distance_from_light) = obj.intersects(light_ray.clone()) {
@@ -103,12 +103,9 @@ impl Engine {
         let mut c = crate::common::BLACK;
         let normal = obj.normal(pos);
 
-        let reflected = (ray.direction
-            - normal * 2.0 * (Vector::dot_product(&normal, &ray.direction)))
-        .normalize();
-
+        let reflected = ray.reflected(&normal);
         let epsilon = 0.05;
-        let epsilon_pos = (Vector::from(ORIGIN, pos) + reflected.normalize() * epsilon).to_point();
+        let epsilon_pos = (Vector::from(ORIGIN, pos) + reflected.vector() * epsilon).to_point();
 
         for light in self.scene.lights.iter() {
             let in_shadow = self.in_shadow(obj, pos, light);
@@ -118,13 +115,13 @@ impl Engine {
                 c += match mode {
                     RenderingMode::Intersect => intersection::process(obj.diffusion(pos)),
                     RenderingMode::Diffuse if !in_shadow => diffusion::process(
-                        light_vector,
+                        light_vector.normalize(),
                         light.intensity(),
                         obj.diffusion(pos),
                         normal,
                     ),
                     RenderingMode::Specular if !in_shadow => specularity::process(
-                        light_vector,
+                        light_vector.normalize(),
                         light.intensity(),
                         obj.specularity(pos),
                         reflected,
@@ -177,8 +174,9 @@ impl Engine {
             .keys()
             .map(|bits| f64::from_bits(bits.clone()))
             .fold(f64::MAX, |acc, x| if acc > x { x } else { acc });
-        let intersection_point =
-            (Vector::from(crate::common::ORIGIN, ray.origin) + ray.direction * min).to_point();
+        let intersection_point = (Vector::from(crate::common::ORIGIN, ray.origin)
+            + ray.direction.vector() * min)
+            .to_point();
 
         let closest: &Box<dyn Object> = intersections.get(&min.to_bits()).unwrap();
 

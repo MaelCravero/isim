@@ -1,4 +1,4 @@
-pub use crate::geometry::{Color, Point, Vector};
+pub use crate::geometry::{Color, NormalVector, Point, Vector};
 
 pub const BLACK: Color = Color(0, 0, 0);
 pub const WHITE: Color = Color(255, 255, 255);

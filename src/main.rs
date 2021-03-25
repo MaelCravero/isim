@@ -45,24 +45,24 @@ fn main() {
         //Box::new(sphere! {(0.0, 1.5, 11.0); 1.0; <uniform>(common::RED, 1.0, 1.0)}),
         //Box::new(sphere! {(0.0, -0.5, 9.0); 0.5; <uniform>(common::GREEN, 1.0, 1.0)}),
         // Aligned
-        Box::new(sphere! {(0.0, 0.0, 8.0); 1.0; <uniform>(common::RED, 1.0, 1.0)}),
-        Box::new(sphere! {(0.0, 0.0, 12.0); 2.0; <uniform>(common::GREEN, 1.0, 1.0)}),
+        Box::new(sphere! {(0.0, -3.0, 8.0); 1.0; <uniform>(common::RED, 1.0, 1.0)}),
+        Box::new(sphere! {(0.0, 3.0, 8.0); 2.0; <uniform>(common::GREEN, 1.0, 1.0)}),
     ];
 
     lights.push(Box::new(scene::light::PointLight::new(
-        Point(0.0, 0.0, 7.0),
+        Point(0.0, 0.0, 8.0),
         (1.0, 1.0, 1.0),
     )));
 
     let scene = scene::Scene::new(cam, lights, objs);
 
     let mut engine = engine::Engine::new(scene);
-    let mut engine = engine::Engine::new(scene1::get(res_x, res_y));
+    //let mut engine = engine::Engine::new(scene1::get(res_x, res_y));
 
     engine.set_diffuse();
     engine.set_specular();
     engine.set_ambient((0.1, 0.1, 0.12));
-    engine.set_reflection();
+    //engine.set_reflection();
     //engine.set_intersect();
 
     let image = engine.render();
