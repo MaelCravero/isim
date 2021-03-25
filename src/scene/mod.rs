@@ -4,12 +4,14 @@ mod ray;
 mod scene;
 mod sphere;
 pub mod texture;
+mod triangle;
 
-use crate::{common::Point, geometry::Vector};
+use crate::{common::Point, geometry::NormalVector};
 
 pub use camera::Camera;
 pub use ray::Ray;
 pub use sphere::Sphere;
+pub use triangle::Triangle;
 
 pub use scene::LightContainer;
 pub use scene::LightType;
@@ -24,7 +26,7 @@ pub trait TextureMaterial {
 
 pub trait Object {
     fn intersects(&self, ray: Ray) -> Option<f64>;
-    fn normal(&self, p: Point) -> Vector;
+    fn normal(&self, p: Point) -> NormalVector;
     fn diffusion(&self, p: Point) -> (f64, f64, f64);
     fn specularity(&self, p: Point) -> f64;
 }

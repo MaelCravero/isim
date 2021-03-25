@@ -1,16 +1,16 @@
 use crate::common::*;
 
 pub fn process(
-    light_vector: Vector,
+    light_vector: NormalVector,
     light_intensity: (f64, f64, f64),
     diffusion: (f64, f64, f64),
-    normal: Vector,
+    normal: NormalVector,
 ) -> Color {
     // I = k * (N.L) * I_l
     let (kr, kg, kb) = diffusion;
     let (lr, lg, lb) = light_intensity;
 
-    let proportion = Vector::dot_product(&normal, &light_vector.normalize());
+    let proportion = NormalVector::dot_product(&normal, &light_vector);
 
     if proportion < 0.0 {
         return crate::common::BLACK;
