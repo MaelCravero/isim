@@ -29,7 +29,7 @@ fn save_image(path: &str, image: Image) {
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (700, 700);
+    let (res_x, res_y) = (200, 200);
     let cam = scene::Camera::new(
         Point(0.0, 0.0, 0.0),
         Point(0.0, 0.0, 4.0),
@@ -41,13 +41,22 @@ fn main() {
         res_y,
     );
     let mut lights = scene::LightContainer::new();
-    let objs: scene::ObjectContainer = vec![
+    let mut objs: scene::ObjectContainer = vec![
         //Box::new(sphere! {(0.0, 1.5, 11.0); 1.0; <uniform>(common::RED, 1.0, 1.0)}),
         //Box::new(sphere! {(0.0, -0.5, 9.0); 0.5; <uniform>(common::GREEN, 1.0, 1.0)}),
         // Aligned
-        Box::new(sphere! {(0.0, -3.0, 8.0); 1.0; <uniform>(common::RED, 1.0, 1.0)}),
-        Box::new(sphere! {(0.0, 3.0, 8.0); 2.0; <uniform>(common::GREEN, 1.0, 1.0)}),
+        //Box::new(sphere! {(0.0, -3.0, 8.0); 1.0; <uniform>(common::RED, 1.0, 1.0)}),
+        //Box::new(sphere! {(0.0, 3.0, 8.0); 2.0; <uniform>(common::GREEN, 1.0, 1.0)}),
     ];
+
+    objs.push(Box::new(scene::Triangle::new(
+        (
+            Point(0.0, 0.0, 5.0),
+            Point(1.0, 0.0, 5.0),
+            Point(0.0, 1.0, 5.0),
+        ),
+        scene::texture::UniformTexture::new(common::BLUE, 1.0, 1.0),
+    )));
 
     lights.push(Box::new(scene::light::PointLight::new(
         Point(0.0, 0.0, 8.0),
