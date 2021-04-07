@@ -16,24 +16,6 @@ where
     pub fn new(points: PointTriplet, texture: T) -> Triangle<T> {
         Triangle { points, texture }
     }
-
-    fn is_inside(&self, p: Point) -> bool {
-        let (a, b, c) = self.points;
-        let pa = Vector::from(p, a);
-        let pb = Vector::from(p, b);
-        let pc = Vector::from(p, c);
-
-        let ab = Vector::from(a, b);
-        let bc = Vector::from(b, c);
-        let ca = Vector::from(c, a);
-
-        let n = self.normal(p).vector();
-        let a = Vector::dot_product(&ab, &pa);
-        let b = Vector::dot_product(&bc, &pb);
-        let c = Vector::dot_product(&ca, &pc);
-
-        (a >= 0.0 && b >= 0.0 && c >= 0.0) || (a <= 0.0 && b <= 0.0 && c <= 0.0)
-    }
 }
 
 impl<T> Object for Triangle<T>
@@ -41,14 +23,48 @@ where
     T: TextureMaterial,
 {
     fn intersects(&self, ray: Ray) -> Option<f64> {
-        let n = self.normal(ray.origin);
+        // Moeller-Trumbore algorithm
 
-        let a = NormalVector::dot_product(&n, &ray.direction);
-        if a == 0.0 {
+        let (a, b, c) = self.points;
+        let ab = Vector::from(a, b);
+        let ac = Vector::from(a, c);
+
+        let h = Vector::cross_product(&ray.direction.vector(), &ac);
+        let dot = Vector::dot_product(&ab, &h);
+
+        if dot < std::f64::EPSILON && dot > -std::f64::EPSILON {
             return None;
         }
 
-        let plane_distance =
+        let n = self.normal(ray.origin);
+        if NormalVector::dot_product(&n, &ray.direction) > -std::f64::EPSILON
+            && NormalVector::dot_product(&n, &ray.direction) < std::f64::EPSILON
+        {
+            return None;
+        }
+
+        let inv_dot = 1.0 / dot;
+        let ao = Vector::from(a, ray.origin);
+        let u = inv_dot * Vector::dot_product(&ao, &h);
+
+        if u < 0.0 || u > 1.0 {
+            return None;
+        }
+
+        let cross = Vector::cross_product(&ao, &ab);
+        let v = inv_dot * Vector::dot_product(&ray.direction.vector(), &cross);
+
+        if v < 0.0 || u + v > 1.0 {
+            return None;
+        }
+
+        let t = inv_dot * Vector::dot_product(&ac, &cross);
+        if t < 0.0 {
+            return None;
+        }
+        return Some(t);
+
+        /*let plane_distance =
             Vector::dot_product(&n.vector(), &Vector::from(ORIGIN, self.points.0));
         let distance = Vector::dot_product(&n.vector(), &Vector::from(ORIGIN, ray.origin))
             + plane_distance / a;
@@ -63,7 +79,7 @@ where
             Some(distance)
         } else {
             None
-        }
+        }*/
     }
 
     fn normal(&self, _p: Point) -> NormalVector {
