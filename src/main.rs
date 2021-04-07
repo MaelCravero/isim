@@ -51,15 +51,15 @@ fn main() {
 
     objs.push(Box::new(scene::Triangle::new(
         (
-            Point(0.0, 0.0, 5.0),
-            Point(1.0, 0.0, 5.0),
+            Point(1.0, 0.0, 6.0),
+            Point(0.0, -1.0, 5.0),
             Point(0.0, 1.0, 5.0),
         ),
         scene::texture::UniformTexture::new(common::BLUE, 1.0, 1.0),
     )));
 
     lights.push(Box::new(scene::light::PointLight::new(
-        Point(0.0, 0.0, 8.0),
+        Point(0.0, 0.0, 0.0),
         (1.0, 1.0, 1.0),
     )));
 
@@ -68,11 +68,11 @@ fn main() {
     let mut engine = engine::Engine::new(scene);
     //let mut engine = engine::Engine::new(scene1::get(res_x, res_y));
 
-    engine.set_diffuse();
-    engine.set_specular();
-    engine.set_ambient((0.1, 0.1, 0.12));
+    //engine.set_diffuse();
+    //engine.set_specular();
+    //engine.set_ambient((0.1, 0.1, 0.12));
     //engine.set_reflection();
-    //engine.set_intersect();
+    engine.set_intersect();
 
     let image = engine.render();
 

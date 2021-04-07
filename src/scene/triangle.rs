@@ -41,14 +41,46 @@ where
     T: TextureMaterial,
 {
     fn intersects(&self, ray: Ray) -> Option<f64> {
-        let n = self.normal(ray.origin);
+        let (a, b, c) = self.points;
+        let ab = Vector::from(a, b);
+        let ac = Vector::from(a, c);
 
-        let a = NormalVector::dot_product(&n, &ray.direction);
-        if a == 0.0 {
+        let pvec = Vector::cross_product(&ray.direction.vector(), &ac);
+        let det = Vector::dot_product(&ab, &pvec);
+
+        if det < std::f64::EPSILON && det > -std::f64::EPSILON {
             return None;
         }
 
-        let plane_distance =
+        let n = self.normal(ray.origin);
+        if NormalVector::dot_product(&n, &ray.direction) > -std::f64::EPSILON
+            && NormalVector::dot_product(&n, &ray.direction) < std::f64::EPSILON
+        {
+            return None;
+        }
+
+        let inv_det = 1.0 / det;
+        let tvec = Vector::from(a, ray.origin);
+        let u = inv_det * Vector::dot_product(&tvec, &pvec);
+
+        if u < 0.0 || u > 1.0 {
+            return None;
+        }
+
+        let qvec = Vector::cross_product(&tvec, &ab);
+        let v = inv_det * Vector::dot_product(&ray.direction.vector(), &qvec);
+
+        if v < 0.0 || u + v > 1.0 {
+            return None;
+        }
+
+        let t = inv_det * Vector::dot_product(&ac, &qvec);
+        if t < 0.0 {
+            return None;
+        }
+        return Some(t);
+
+        /*let plane_distance =
             Vector::dot_product(&n.vector(), &Vector::from(ORIGIN, self.points.0));
         let distance = Vector::dot_product(&n.vector(), &Vector::from(ORIGIN, ray.origin))
             + plane_distance / a;
@@ -63,7 +95,7 @@ where
             Some(distance)
         } else {
             None
-        }
+        }*/
     }
 
     fn normal(&self, _p: Point) -> NormalVector {
