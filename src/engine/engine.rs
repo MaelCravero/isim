@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use rand::Rng;
+
 use crate::{
     common::*,
     image::Image,
@@ -63,18 +65,37 @@ impl Engine {
         let mut res = Image::new(self.scene.cam.height, self.scene.cam.width);
         for x in 0..self.scene.cam.height {
             for y in 0..self.scene.cam.width {
-                let origin = self.scene.cam.get_pixel_pos(x, y);
-                let direction = Vector::from(self.scene.cam.pos, origin).normalize();
+                let mut rng = rand::thread_rng();
+                let (mut r, mut g, mut b) = (0, 0, 0);
 
-                let ray = Ray {
-                    energy: 1.0,
-                    origin,
-                    direction,
-                };
+                for _ in 0..10 {
+                    let origin = self.scene.cam.get_pixel_pos(x, y);
 
-                if let Some(c) = self.cast_ray(ray) {
-                    res.set(x, y, c)
+                    let alpha = 1000.0;
+                    let (dx, dy, dz) = (
+                        (rng.gen::<f64>() - 0.5) / alpha,
+                        (rng.gen::<f64>() - 0.5) / alpha,
+                        (rng.gen::<f64>() - 0.5) / alpha,
+                    );
+
+                    let direction = (Vector::from(self.scene.cam.pos, origin)
+                        + Vector::new(dx, dy, dz))
+                    .normalize();
+
+                    let ray = Ray {
+                        energy: 1.0,
+                        origin,
+                        direction,
+                    };
+
+                    if let Some(c) = self.cast_ray(ray) {
+                        r += c.0 as i32;
+                        g += c.1 as i32;
+                        b += c.2 as i32;
+                    }
                 }
+                let c = Color((r / 10) as u8, (g / 10) as u8, (b / 10) as u8);
+                res.set(x, y, c)
             }
         }
         res
