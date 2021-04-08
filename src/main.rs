@@ -29,7 +29,7 @@ fn save_image(path: &str, image: Image) {
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (500, 500);
+    let (res_x, res_y) = (200, 200);
     let cam = scene::Camera::new(
         Point(0.0, 0.0, 0.0),
         Point(0.0, 0.0, 4.0),
@@ -47,6 +47,10 @@ fn main() {
             triangle! {Point(0.0, 0.0, 6.0), Point(0.0, -1.0, 6.0), Point(-1.0, 1.0, 6.0);
             <uniform>(common::BLUE, 1.0, 1.0)},
         ),
+        Box::new(
+            cylinder! {Point(0.0, 1.5, 11.0), Point(4.0, 5.5, 11.0); 0.7;
+            <uniform>(common::GREEN, 1.0, 1.0)},
+        ),
     ];
 
     lights.push(Box::new(scene::light::PointLight::new(
@@ -58,7 +62,7 @@ fn main() {
 
     let mut engine = engine::Engine::new(scene);
     //let mut engine = engine::Engine::new(premade_scenes::scene1::get(res_x, res_y));
-    let mut engine = engine::Engine::new(premade_scenes::scene2::get(res_x, res_y));
+    //let mut engine = engine::Engine::new(premade_scenes::scene2::get(res_x, res_y));
 
     engine.set_diffuse();
     engine.set_specular();

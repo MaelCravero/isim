@@ -1,4 +1,5 @@
 mod camera;
+mod cylinder;
 pub mod light;
 mod ray;
 mod scene;
@@ -10,6 +11,8 @@ use crate::{common::Point, geometry::NormalVector};
 
 pub use camera::Camera;
 pub use ray::Ray;
+
+pub use cylinder::Cylinder;
 pub use sphere::Sphere;
 pub use triangle::Triangle;
 
@@ -62,5 +65,16 @@ macro_rules! triangle {
         use crate::scene::Triangle;
 
         Triangle::<UniformTexture>::new(($a, $b, $c), UniformTexture::new($color, $d, $s))
+    }};
+}
+
+#[macro_export]
+macro_rules! cylinder {
+    ($a:expr, $b:expr; $r:expr; <uniform>($c:expr, $d:expr, $s:expr)) => {{
+        use crate::common::Point;
+        use crate::scene::texture::UniformTexture;
+        use crate::scene::Cylinder;
+
+        Cylinder::<UniformTexture>::new($a, $b, $r, UniformTexture::new($c, $d, $s))
     }};
 }
