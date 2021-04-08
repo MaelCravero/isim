@@ -99,6 +99,13 @@ impl NormalVector {
     }
 }
 
+impl ops::Neg for NormalVector {
+    type Output = NormalVector;
+    fn neg(self) -> NormalVector {
+        NormalVector(-self.vector())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

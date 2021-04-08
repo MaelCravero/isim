@@ -103,6 +103,12 @@ impl Engine {
         let mut c = crate::common::BLACK;
         let normal = obj.normal(pos);
 
+        let normal = if NormalVector::dot_product(&normal, &ray.direction) > 0.0 {
+            -normal
+        } else {
+            normal
+        };
+
         let reflected = ray.reflected(&normal);
         let epsilon = 0.05;
         let epsilon_pos = (Vector::from(ORIGIN, pos) + reflected.vector() * epsilon).to_point();
