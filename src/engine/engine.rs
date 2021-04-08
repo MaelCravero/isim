@@ -10,6 +10,9 @@ use crate::{
 
 use super::render::*;
 
+const ANTI_ALIASING_NB: i32 = 4;
+const ANTI_ALIASING_DELTA: f64 = 0.001;
+
 enum RenderingMode {
     Intersect,
     Diffuse,
@@ -68,14 +71,13 @@ impl Engine {
                 let mut rng = rand::thread_rng();
                 let (mut r, mut g, mut b) = (0, 0, 0);
 
-                for _ in 0..10 {
+                for _ in 0..ANTI_ALIASING_NB {
                     let origin = self.scene.cam.get_pixel_pos(x, y);
 
-                    let alpha = 1000.0;
                     let (dx, dy, dz) = (
-                        (rng.gen::<f64>() - 0.5) / alpha,
-                        (rng.gen::<f64>() - 0.5) / alpha,
-                        (rng.gen::<f64>() - 0.5) / alpha,
+                        (rng.gen::<f64>() - 0.5) * ANTI_ALIASING_DELTA,
+                        (rng.gen::<f64>() - 0.5) * ANTI_ALIASING_DELTA,
+                        (rng.gen::<f64>() - 0.5) * ANTI_ALIASING_DELTA,
                     );
 
                     let direction = (Vector::from(self.scene.cam.pos, origin)
@@ -94,7 +96,11 @@ impl Engine {
                         b += c.2 as i32;
                     }
                 }
-                let c = Color((r / 10) as u8, (g / 10) as u8, (b / 10) as u8);
+                let c = Color(
+                    (r / ANTI_ALIASING_NB) as u8,
+                    (g / ANTI_ALIASING_NB) as u8,
+                    (b / ANTI_ALIASING_NB) as u8,
+                );
                 res.set(x, y, c)
             }
         }
@@ -111,7 +117,7 @@ impl Engine {
         if let Some(distance_from_light) = obj.intersects(light_ray.clone()) {
             for other in self.scene.objects.iter() {
                 if let Some(d) = other.intersects(light_ray.clone()) {
-                    if d < distance_from_light && (&*other as *const _ != &*obj as *const _) {
+                    if d < distance_from_light {
                         return true;
                     }
                 }
