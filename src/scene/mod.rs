@@ -53,3 +53,14 @@ macro_rules! sphere {
         Sphere::<UniformTexture>::new($p, $r, UniformTexture::new($c, $d, $s))
     }};
 }
+
+#[macro_export]
+macro_rules! triangle {
+    ($a:expr, $b:expr, $c:expr; <uniform>($color:expr, $d:expr, $s:expr)) => {{
+        use crate::common::Point;
+        use crate::scene::texture::UniformTexture;
+        use crate::scene::Triangle;
+
+        Triangle::<UniformTexture>::new(($a, $b, $c), UniformTexture::new($color, $d, $s))
+    }};
+}
