@@ -2,6 +2,7 @@ mod common;
 mod engine;
 mod geometry;
 mod image;
+mod lsystem;
 mod premade_scenes;
 mod scene;
 
@@ -51,6 +52,10 @@ fn main() {
             cylinder! {Point(0.0, 1.5, 11.0), Point(4.0, 5.5, 11.0); 0.7;
             <uniform>(common::GREEN, 1.0, 1.0)},
         ),
+        Box::new(cylinder! {Point(0.0, 0.0, 4.0), Point(0.0, 0.0, 16.0); 0.3;
+        <uniform>(common::YELLOW, 1.0, 1.0)}),
+        //Box::new(sphere! {Point(0.0, 0.0, 4.0); 0.3;
+        //<uniform>(common::YELLOW, 1.0, 1.0)}),
     ];
 
     lights.push(Box::new(scene::light::PointLight::new(
@@ -64,11 +69,11 @@ fn main() {
     //let mut engine = engine::Engine::new(premade_scenes::scene1::get(res_x, res_y));
     //let mut engine = engine::Engine::new(premade_scenes::scene2::get(res_x, res_y));
 
-    engine.set_diffuse();
-    engine.set_specular();
-    engine.set_ambient((0.1, 0.1, 0.12));
+    //engine.set_diffuse();
+    //engine.set_specular();
+    //engine.set_ambient((0.1, 0.1, 0.12));
     //engine.set_reflection();
-    //engine.set_intersect();
+    engine.set_intersect();
 
     let image = engine.render();
 
