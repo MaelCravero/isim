@@ -63,6 +63,20 @@ impl ops::Div<f64> for Vector {
     }
 }
 
+impl ops::Mul<Vector> for f64 {
+    type Output = Vector;
+    fn mul(self, v: Vector) -> Vector {
+        Vector::new(self * v.x, self * v.y, self * v.z)
+    }
+}
+
+impl ops::Div<Vector> for f64 {
+    type Output = Vector;
+    fn div(self, v: Vector) -> Vector {
+        Vector::new(self / v.x, self / v.y, self / v.z)
+    }
+}
+
 impl Vector {
     pub fn dot_product(v1: &Vector, v2: &Vector) -> f64 {
         v1.x * v2.x + v1.y * v2.y + v1.z * v2.z
