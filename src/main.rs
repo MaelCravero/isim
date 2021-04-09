@@ -30,7 +30,7 @@ fn save_image(path: &str, image: Image) {
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (200, 200);
+    let (res_x, res_y) = (700, 700);
     let cam = scene::Camera::new(
         Point(0.0, 0.0, 0.0),
         Point(0.0, 0.0, 4.0),
@@ -57,6 +57,22 @@ fn main() {
         //Box::new(sphere! {Point(0.0, 0.0, 4.0); 0.3;
         //<uniform>(common::YELLOW, 1.0, 1.0)}),
     ];
+
+    let mut lsystem = lsystem::LSystem::new(vec!['X']);
+    lsystem.add_rule('X', "F+[[X]-X]-F[-FX]+X".chars().collect());
+    lsystem.add_rule('F', "FF".chars().collect());
+
+    for _ in 0..args[2].parse::<i32>().unwrap() {
+        lsystem.expand();
+    }
+
+    let objs = lsystem.translate(
+        Point(-20.0, 20.0, 20.0),
+        25.0f64.to_radians(),
+        Vector::new(1.0, -1.0, 0.0).normalize(),
+        0.5,
+        0.1,
+    );
 
     lights.push(Box::new(scene::light::PointLight::new(
         Point(0.0, -2.0, 0.0),
