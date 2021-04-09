@@ -30,7 +30,7 @@ fn save_image(path: &str, image: Image) {
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (700, 700);
+    let (res_x, res_y) = (300, 300);
     let cam = scene::Camera::new(
         Point(0.0, 0.0, 0.0),
         Point(0.0, 0.0, 4.0),
