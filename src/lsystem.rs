@@ -1,3 +1,4 @@
+use crate::common::*;
 use std::collections::HashMap;
 
 type LSConstant = char;
@@ -42,6 +43,58 @@ impl LSystem {
             .flatten()
             .collect::<Vec<char>>()
             .to_owned();
+    }
+
+    pub fn translate(
+        &self,
+        pos: Point,
+        d_theta: f64,
+        direction: NormalVector,
+        length: f64,
+        radius: f64,
+    ) -> crate::scene::ObjectContainer {
+        let mut res = crate::scene::ObjectContainer::new();
+        let mut pos = pos;
+        let mut stack = Vec::new();
+        let mut theta: f64 = 0.0;
+
+        for v in self.value.iter() {
+            match v {
+                'X' => (),
+                'F' => {
+                    use crate::scene::texture::UniformTexture;
+                    use crate::scene::Cylinder;
+
+                    let Vector { x, y, z } = direction.vector();
+                    let direction = Vector::new(
+                        theta.cos() * x - theta.sin() * y,
+                        theta.sin() * x + theta.cos() * y,
+                        z,
+                    );
+                    let dst = (Vector::from(ORIGIN, pos) + length * direction).to_point();
+
+                    res.push(Box::new(Cylinder::new(
+                        pos,
+                        dst,
+                        radius,
+                        UniformTexture::new(GREEN, 1.0, 1.0),
+                    )));
+
+                    pos = dst;
+                }
+                '+' => theta += d_theta,
+                '-' => theta -= d_theta,
+                '[' => stack.push((pos, theta)),
+                ']' => {
+                    let pair = stack.pop().unwrap();
+                    pos = pair.0;
+                    theta = pair.1;
+                }
+                c => panic!("Unallowed char {}", c),
+            }
+        }
+
+        res
     }
 }
 
