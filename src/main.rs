@@ -30,7 +30,7 @@ fn save_image(path: &str, image: Image) {
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (300, 300);
+    let (res_x, res_y) = (500, 500);
     let cam = scene::Camera::new(
         Point(0.0, 0.0, 0.0),
         Point(0.0, 0.0, 4.0),
@@ -69,6 +69,8 @@ fn main() {
     let objs = lsystem.translate(
         Point(-20.0, 20.0, 20.0),
         25.0f64.to_radians(),
+        25.0f64.to_radians(),
+        25.0f64.to_radians(),
         Vector::new(1.0, -1.0, 0.0).normalize(),
         0.5,
         0.1,
@@ -85,11 +87,11 @@ fn main() {
     //let mut engine = engine::Engine::new(premade_scenes::scene1::get(res_x, res_y));
     //let mut engine = engine::Engine::new(premade_scenes::scene2::get(res_x, res_y));
 
-    //engine.set_diffuse();
-    //engine.set_specular();
-    //engine.set_ambient((0.1, 0.1, 0.12));
+    engine.set_diffuse();
+    engine.set_specular();
+    engine.set_ambient((0.1, 0.1, 0.12));
     //engine.set_reflection();
-    engine.set_intersect();
+    //engine.set_intersect();
 
     let image = engine.render();
 
