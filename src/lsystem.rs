@@ -56,7 +56,7 @@ impl LSystem {
     pub fn translate(
         &self,
         pos: Point,
-        d_theta: f64,
+        d_turn: f64,
         d_roll: f64,
         d_pitch: f64,
         direction: NormalVector,
@@ -65,11 +65,11 @@ impl LSystem {
     ) -> crate::scene::ObjectContainer {
         let state = LSTState {
             pos,
-            theta: 0.0,
+            turn: 0.0,
             roll: 0.0,
             pitch: 0.0,
         };
-        LSTranslator::new(direction, d_theta, d_roll, d_pitch, length, radius)
+        LSTranslator::new(direction, d_turn, d_roll, d_pitch, length, radius)
             .run(state, &self.value)
     }
 }
@@ -79,7 +79,7 @@ use crate::scene::ObjectContainer as LSTResult;
 #[derive(Debug, Clone, Copy)]
 struct LSTState {
     pos: Point,
-    theta: f64,
+    turn: f64,
     roll: f64,
     pitch: f64,
 }
@@ -88,7 +88,7 @@ type LSTStack = Vec<LSTState>;
 
 struct LSTranslator {
     direction: NormalVector,
-    d_theta: f64,
+    d_turn: f64,
     d_roll: f64,
     d_pitch: f64,
     length: f64,
@@ -100,7 +100,7 @@ struct LSTranslator {
 impl LSTranslator {
     fn new(
         direction: NormalVector,
-        d_theta: f64,
+        d_turn: f64,
         d_roll: f64,
         d_pitch: f64,
         length: f64,
@@ -108,7 +108,7 @@ impl LSTranslator {
     ) -> LSTranslator {
         LSTranslator {
             direction,
-            d_theta,
+            d_turn,
             d_roll,
             d_pitch,
             length,
@@ -130,13 +130,29 @@ impl LSTranslator {
         )));
     }
 
-    fn compute_dst(&self, state: &LSTState) -> Point {
-        let Vector { x, y, z } = self.direction.vector();
-        let direction = Vector::new(
-            state.theta.cos() * x - state.theta.sin() * y,
-            state.theta.sin() * x + state.theta.cos() * y,
+    fn rotate(x: f64, y: f64, z: f64, state: &LSTState) -> (f64, f64, f64) {
+        let (x, y, z) = (
+            state.turn.cos() * x - state.turn.sin() * y,
+            state.turn.sin() * x + state.turn.cos() * y,
             z,
         );
+        let (x, y, z) = (
+            state.pitch.cos() * x + state.pitch.sin() * z,
+            y,
+            -state.pitch.sin() * x + state.pitch.cos() * z,
+        );
+        let (x, y, z) = (
+            x,
+            state.roll.cos() * y - state.roll.sin() * z,
+            state.roll.sin() * y + state.roll.cos() * z,
+        );
+        (x, y, z)
+    }
+
+    fn compute_dst(&self, state: &LSTState) -> Point {
+        let Vector { x, y, z } = self.direction.vector();
+        let (x, y, z) = LSTranslator::rotate(x, y, z, &state);
+        let direction = Vector::new(x, y, z);
         let dst = (Vector::from(ORIGIN, state.pos) + self.length * direction).to_point();
         dst
     }
@@ -152,8 +168,8 @@ impl LSTranslator {
                     self.add_edge(&state, dst);
                     state.pos = dst;
                 }
-                '+' => state.theta += self.d_theta,
-                '-' => state.theta -= self.d_theta,
+                '+' => state.turn += self.d_turn,
+                '-' => state.turn -= self.d_turn,
                 '[' => self.saved_states.push(state.clone()),
                 ']' => state = self.saved_states.pop().unwrap(),
                 c => panic!("Unallowed char {}", c),
