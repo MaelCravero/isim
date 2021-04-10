@@ -58,11 +58,8 @@ fn main() {
         //<uniform>(common::YELLOW, 1.0, 1.0)}),
     ];
 
-    let mut lsystem = lsystem::LSystem::new(vec!['X']);
-    lsystem.add_rule('X', "F+[[X]-X]-F[-FX]+X".chars().collect());
-    lsystem.add_rule('F', "FF".chars().collect());
-
-    for _ in 0..args[2].parse::<i32>().unwrap() {
+    let mut lsystem = lsystem::LSystem::from_file(&args[2]).unwrap();
+    for _ in 0..args[3].parse::<i32>().unwrap() {
         lsystem.expand();
     }
 

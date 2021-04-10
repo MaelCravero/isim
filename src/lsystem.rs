@@ -1,5 +1,9 @@
 use crate::common::*;
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fs::File,
+    io::{self, BufRead},
+};
 
 type LSConstant = char;
 
@@ -43,6 +47,28 @@ impl LSystem {
             .flatten()
             .collect::<Vec<char>>()
             .to_owned();
+    }
+
+    pub fn from_file(path: &str) -> std::io::Result<LSystem> {
+        let file = File::open(path)?;
+        let mut lines = std::io::BufReader::new(file).lines();
+
+        let axioms = lines.next().unwrap()?;
+
+        let mut res = LSystem::new(axioms.chars().collect());
+
+        for rule in lines {
+            let mut chars: LSValues = rule?.chars().collect();
+
+            let token = chars[0];
+
+            chars.remove(0);
+            chars.remove(0);
+
+            res.add_rule(token, chars);
+        }
+
+        Ok(res)
     }
 }
 
@@ -170,6 +196,11 @@ impl LSTranslator {
                 }
                 '+' => state.turn += self.d_turn,
                 '-' => state.turn -= self.d_turn,
+                '&' => state.pitch += self.d_pitch,
+                '^' => state.pitch -= self.d_pitch,
+                '\\' => state.roll += self.d_roll,
+                '/' => state.roll -= self.d_roll,
+                '|' => state.turn += 180f64.to_radians(),
                 '[' => self.saved_states.push(state.clone()),
                 ']' => state = self.saved_states.pop().unwrap(),
                 c => panic!("Unallowed char {}", c),
