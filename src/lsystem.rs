@@ -116,14 +116,19 @@ impl ToString for LSystem {
 
 impl LSystem {
     pub fn translate(
-        &self,
+        self,
         pos: Point,
         direction: NormalVector,
         length: f64,
         radius: f64,
     ) -> crate::scene::ObjectContainer {
-        let state = LSTState { pos, direction };
-        LSTranslator::new(self.delta, length, radius).run(state, &self.value)
+        let state = LSTState {
+            pos,
+            direction,
+            color: 0,
+            radius,
+        };
+        LSTranslator::new(self.delta, length, self.color_table).run(state, &self.value)
     }
 }
 
@@ -133,6 +138,8 @@ use crate::scene::ObjectContainer as LSTResult;
 struct LSTState {
     pos: Point,
     direction: NormalVector,
+    color: usize,
+    radius: f64,
 }
 
 impl LSTState {
@@ -165,6 +172,10 @@ impl LSTState {
         );
         self.direction = Vector::new(x, y, z).normalize();
     }
+
+    fn increase_color(&mut self, nb_color: usize) {
+        self.color = (self.color + 1) % nb_color;
+    }
 }
 
 type LSTStack = Vec<LSTState>;
@@ -173,20 +184,24 @@ type LSTLeave = Vec<Point>;
 struct LSTranslator {
     delta: f64,
     length: f64,
-    radius: f64,
     saved_states: LSTStack,
+    color_table: LSColorTable,
     res: LSTResult,
 }
 
 impl LSTranslator {
-    fn new(delta: f64, length: f64, radius: f64) -> LSTranslator {
+    fn new(delta: f64, length: f64, color_table: LSColorTable) -> LSTranslator {
         LSTranslator {
             delta,
             length,
-            radius,
             saved_states: LSTStack::new(),
+            color_table,
             res: LSTResult::new(),
         }
+    }
+
+    fn get_color(&self, state: &LSTState) -> Color {
+        self.color_table[state.color]
     }
 
     fn add_edge(&mut self, state: &LSTState, dst: Point) {
@@ -196,12 +211,12 @@ impl LSTranslator {
         self.res.push(Box::new(Cylinder::new(
             state.pos,
             dst,
-            self.radius,
-            UniformTexture::new(GREEN, 1.0, 1.0),
+            state.radius,
+            UniformTexture::new(self.get_color(&state), 1.0, 1.0),
         )));
     }
 
-    fn generate_leaf(&mut self, leaf: &mut LSTLeave) {
+    fn generate_leaf(&mut self, state: &LSTState, leaf: &mut LSTLeave) {
         assert!(leaf.len() >= 3);
 
         use crate::scene::texture::UniformTexture;
@@ -212,7 +227,10 @@ impl LSTranslator {
 
         while !leaf.is_empty() {
             let next = leaf.pop().unwrap();
-            let triangle = Triangle::new((v0, prev, next), UniformTexture::new(RED, 1.0, 1.0));
+            let triangle = Triangle::new(
+                (v0, prev, next),
+                UniformTexture::new(self.get_color(&state), 1.0, 1.0),
+            );
             self.res.push(Box::new(triangle));
             prev = next;
         }
@@ -227,7 +245,7 @@ impl LSTranslator {
     fn run(mut self, initial_state: LSTState, values: &LSValues) -> LSTResult {
         let mut state = initial_state;
         let mut leaf = LSTLeave::new();
-        let in_leaf = false;
+        let mut in_leaf = false;
 
         for val in values {
             match val {
@@ -240,6 +258,8 @@ impl LSTranslator {
                     }
                     state.pos = dst;
                 }
+                '!' => state.radius /= 1.5,
+                '\'' => state.increase_color(self.color_table.len()),
                 '+' => state.rotate_turn(self.delta),
                 '-' => state.rotate_turn(-self.delta),
                 '&' => state.rotate_pitch(self.delta),
@@ -252,10 +272,12 @@ impl LSTranslator {
                 '{' => {
                     assert!(leaf.is_empty());
                     self.saved_states.push(state.clone());
+                    in_leaf = true;
                 }
                 '}' => {
-                    self.generate_leaf(&mut leaf);
+                    self.generate_leaf(&state, &mut leaf);
                     state = self.saved_states.pop().unwrap();
+                    in_leaf = false;
                 }
                 _ => (),
                 c => panic!("Unallowed char {}", c),
