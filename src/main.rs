@@ -64,12 +64,14 @@ fn main() {
     }
 
     let objs = lsystem.translate(
-        Point(-20.0, 20.0, 20.0),
+        Point(0.0, 0.0, 20.0),
+        //Point(-10.0, 10.0, 30.0),
         25.0f64.to_radians(),
         25.0f64.to_radians(),
         25.0f64.to_radians(),
-        Vector::new(1.0, -1.0, 0.0).normalize(),
-        0.5,
+        Vector::new(0.0, 0.0, -1.0).normalize(),
+        //Vector::new(1.0, -1.0, -1.0).normalize(),
+        1.5,
         0.1,
     );
 
