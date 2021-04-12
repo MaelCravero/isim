@@ -1,26 +1,29 @@
 use crate::common::*;
-use std::{
-    collections::HashMap,
-    fs::File,
-    io::{self, BufRead},
-};
+use std::{collections::HashMap, fs::File, io::BufRead};
 
 type LSConstant = char;
 
 type LSValues = Vec<LSConstant>;
 type LSRules = HashMap<LSConstant, LSValues>;
+type LSColorTable = Vec<Color>;
 
 #[derive(Debug, Clone)]
 pub struct LSystem {
     value: LSValues,
     rules: LSRules,
+    age: u64,
+    delta: f64,
+    color_table: LSColorTable,
 }
 
 impl LSystem {
-    pub fn new(axioms: LSValues) -> LSystem {
+    pub fn new(axioms: LSValues, age: u64, delta: f64) -> LSystem {
         LSystem {
             value: axioms,
+            age,
+            delta,
             rules: LSRules::new(),
+            color_table: LSColorTable::new(),
         }
     }
 
@@ -31,6 +34,17 @@ impl LSystem {
     /// Return true if key has been modified
     pub fn add_rule(&mut self, symbol: LSConstant, rule: LSValues) -> bool {
         self.rules.insert(symbol, rule).is_some()
+    }
+
+    pub fn add_color(&mut self, color: Color) {
+        self.color_table.push(color)
+    }
+
+    pub fn with_colors(self, color_table: LSColorTable) -> LSystem {
+        LSystem {
+            color_table,
+            ..self
+        }
     }
 
     pub fn expand(&mut self) {
@@ -49,13 +63,35 @@ impl LSystem {
             .to_owned();
     }
 
+    pub fn generate(mut self) -> LSystem {
+        for _ in 0..self.age {
+            self.expand()
+        }
+        self
+    }
+
     pub fn from_file(path: &str) -> std::io::Result<LSystem> {
         let file = File::open(path)?;
         let mut lines = std::io::BufReader::new(file).lines();
 
+        // Prelude
+        let age = lines.next().unwrap()?.parse::<u64>().unwrap();
+        let delta = lines.next().unwrap()?.parse::<f64>().unwrap().to_radians();
+
+        let mut colors = LSColorTable::new();
+
+        for val in lines.next().unwrap()?.split_whitespace() {
+            let r = u8::from_str_radix(&val[0..2], 16).unwrap();
+            let g = u8::from_str_radix(&val[2..4], 16).unwrap();
+            let b = u8::from_str_radix(&val[4..6], 16).unwrap();
+
+            colors.push(Color(r, g, b))
+        }
+
+        // End of prelude
         let axioms = lines.next().unwrap()?;
 
-        let mut res = LSystem::new(axioms.chars().collect());
+        let mut res = LSystem::new(axioms.chars().collect(), age, delta).with_colors(colors);
 
         for rule in lines {
             let mut chars: LSValues = rule?.chars().collect();
@@ -82,15 +118,12 @@ impl LSystem {
     pub fn translate(
         &self,
         pos: Point,
-        d_turn: f64,
-        d_roll: f64,
-        d_pitch: f64,
         direction: NormalVector,
         length: f64,
         radius: f64,
     ) -> crate::scene::ObjectContainer {
         let state = LSTState { pos, direction };
-        LSTranslator::new(d_turn, d_roll, d_pitch, length, radius).run(state, &self.value)
+        LSTranslator::new(self.delta, length, radius).run(state, &self.value)
     }
 }
 
@@ -137,9 +170,7 @@ impl LSTState {
 type LSTStack = Vec<LSTState>;
 
 struct LSTranslator {
-    d_turn: f64,
-    d_roll: f64,
-    d_pitch: f64,
+    delta: f64,
     length: f64,
     radius: f64,
     saved_states: LSTStack,
@@ -147,11 +178,9 @@ struct LSTranslator {
 }
 
 impl LSTranslator {
-    fn new(d_turn: f64, d_roll: f64, d_pitch: f64, length: f64, radius: f64) -> LSTranslator {
+    fn new(delta: f64, length: f64, radius: f64) -> LSTranslator {
         LSTranslator {
-            d_turn,
-            d_roll,
-            d_pitch,
+            delta,
             length,
             radius,
             saved_states: LSTStack::new(),
@@ -187,12 +216,12 @@ impl LSTranslator {
                     self.add_edge(&state, dst);
                     state.pos = dst;
                 }
-                '+' => state.rotate_turn(self.d_turn),
-                '-' => state.rotate_turn(-self.d_turn),
-                '&' => state.rotate_pitch(self.d_pitch),
-                '^' => state.rotate_pitch(-self.d_pitch),
-                '\\' => state.rotate_roll(self.d_roll),
-                '/' => state.rotate_roll(-self.d_roll),
+                '+' => state.rotate_turn(self.delta),
+                '-' => state.rotate_turn(-self.delta),
+                '&' => state.rotate_pitch(self.delta),
+                '^' => state.rotate_pitch(-self.delta),
+                '\\' => state.rotate_roll(self.delta),
+                '/' => state.rotate_roll(-self.delta),
                 '|' => state.rotate_turn(180f64.to_radians()),
                 '[' => self.saved_states.push(state.clone()),
                 ']' => state = self.saved_states.pop().unwrap(),
@@ -211,7 +240,7 @@ mod tests {
 
     #[test]
     fn basic_algae() {
-        let mut lsystem = LSystem::new(vec!['a']);
+        let mut lsystem = LSystem::new(vec!['a'], 0, 0.0);
         lsystem.add_rule('a', vec!['a', 'b']);
         lsystem.add_rule('b', vec!['a']);
 
