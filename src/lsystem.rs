@@ -119,12 +119,14 @@ impl LSystem {
         self,
         pos: Point,
         direction: NormalVector,
+        right: NormalVector,
         length: f64,
         radius: f64,
     ) -> crate::scene::ObjectContainer {
         let state = LSTState {
             pos,
             direction,
+            right,
             color: 0,
             radius,
         };
@@ -138,39 +140,35 @@ use crate::scene::ObjectContainer as LSTResult;
 struct LSTState {
     pos: Point,
     direction: NormalVector,
+    right: NormalVector,
     color: usize,
     radius: f64,
 }
 
 impl LSTState {
     fn rotate_turn(&mut self, turn: f64) {
-        let Vector { x, y, z } = self.direction.vector();
-        let (x, y, z) = (
-            turn.cos() * x - turn.sin() * y,
-            turn.sin() * x + turn.cos() * y,
-            z,
-        );
-        self.direction = Vector::new(x, y, z).normalize();
+        let direction = self.direction.vector();
+        let right = self.right.vector();
+        let axis = Vector::cross_product(&direction, &right).normalize();
+
+        self.direction = direction.rotate(&axis, turn).normalize();
+        self.right = right.rotate(&axis, turn).normalize();
     }
 
     fn rotate_pitch(&mut self, pitch: f64) {
-        let Vector { x, y, z } = self.direction.vector();
-        let (x, y, z) = (
-            pitch.cos() * x + pitch.sin() * z,
-            y,
-            -pitch.sin() * x + pitch.cos() * z,
-        );
-        self.direction = Vector::new(x, y, z).normalize();
+        self.direction = self
+            .direction
+            .vector()
+            .rotate(&self.right, pitch)
+            .normalize();
     }
 
     fn rotate_roll(&mut self, roll: f64) {
-        let Vector { x, y, z } = self.direction.vector();
-        let (x, y, z) = (
-            x,
-            roll.cos() * y - roll.sin() * z,
-            roll.sin() * y + roll.cos() * z,
-        );
-        self.direction = Vector::new(x, y, z).normalize();
+        self.right = self
+            .right
+            .vector()
+            .rotate(&self.direction, roll)
+            .normalize();
     }
 
     fn increase_color(&mut self, nb_color: usize) {
@@ -271,12 +269,12 @@ impl LSTranslator {
                 ']' => state = self.saved_states.pop().unwrap(),
                 '{' => {
                     assert!(leaf.is_empty());
-                    self.saved_states.push(state.clone());
+                    //self.saved_states.push(state.clone());
                     in_leaf = true;
                 }
                 '}' => {
                     self.generate_leaf(&state, &mut leaf);
-                    state = self.saved_states.pop().unwrap();
+                    //state = self.saved_states.pop().unwrap();
                     in_leaf = false;
                 }
                 _ => (),

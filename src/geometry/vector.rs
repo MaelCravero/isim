@@ -101,6 +101,15 @@ impl Vector {
     pub fn to_point(self) -> Point {
         Point(self.x, self.y, self.z)
     }
+
+    pub fn rotate(self, axis: &NormalVector, angle: f64) -> Vector {
+        // R_u(\theta)x = u(u.x) + cos(\theta)(u * x) * u + sin(\theta)(u * x)
+        let u = axis.vector();
+        let cross = Vector::cross_product(&u, &self);
+        let dot = Vector::dot_product(&u, &self);
+
+        dot * u + angle.cos() * Vector::cross_product(&cross, &u) + angle.sin() * cross
+    }
 }
 
 impl NormalVector {
