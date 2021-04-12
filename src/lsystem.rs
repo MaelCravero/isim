@@ -1,10 +1,12 @@
 use crate::common::*;
 use std::{collections::HashMap, fs::File, io::BufRead};
 
+use rand::seq::SliceRandom;
+
 type LSConstant = char;
 
 type LSValues = Vec<LSConstant>;
-type LSRules = HashMap<LSConstant, LSValues>;
+type LSRules = HashMap<LSConstant, Vec<LSValues>>;
 type LSColorTable = Vec<Color>;
 
 #[derive(Debug, Clone)]
@@ -32,8 +34,12 @@ impl LSystem {
     }
 
     /// Return true if key has been modified
-    pub fn add_rule(&mut self, symbol: LSConstant, rule: LSValues) -> bool {
-        self.rules.insert(symbol, rule).is_some()
+    pub fn add_rule(&mut self, symbol: LSConstant, rule: LSValues) {
+        if !self.rules.contains_key(&symbol) {
+            self.rules.insert(symbol, vec![rule]);
+        } else {
+            self.rules.get_mut(&symbol).unwrap().push(rule);
+        }
     }
 
     pub fn add_color(&mut self, color: Color) {
@@ -48,13 +54,14 @@ impl LSystem {
     }
 
     pub fn expand(&mut self) {
+        let mut rng = rand::thread_rng();
         self.value = self
             .value
             .iter()
             .map(|&v| {
                 self.rules
                     .get(&v)
-                    .map(|vec| vec.clone().to_owned())
+                    .map(|vec| vec.choose(&mut rng).unwrap().clone().to_owned())
                     .or(Some(vec![v]))
                     .unwrap()
             })
