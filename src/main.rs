@@ -58,20 +58,14 @@ fn main() {
         //<uniform>(common::YELLOW, 1.0, 1.0)}),
     ];
 
-    let mut lsystem = lsystem::LSystem::from_file(&args[2]).unwrap();
-    for _ in 0..args[3].parse::<i32>().unwrap() {
-        lsystem.expand();
-    }
+    let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
     let objs = lsystem.translate(
-        Point(0.0, 0.0, 20.0),
+        Point(-10.0, 10.0, 20.0),
         //Point(-10.0, 10.0, 30.0),
-        25.0f64.to_radians(),
-        25.0f64.to_radians(),
-        25.0f64.to_radians(),
-        Vector::new(0.0, 0.0, -1.0).normalize(),
+        Vector::new(1.0, -1.0, 0.0).normalize(),
         //Vector::new(1.0, -1.0, -1.0).normalize(),
-        1.5,
+        0.5,
         0.1,
     );
 
