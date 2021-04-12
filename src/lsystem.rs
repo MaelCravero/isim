@@ -168,6 +168,7 @@ impl LSTState {
 }
 
 type LSTStack = Vec<LSTState>;
+type LSTLeave = Vec<Point>;
 
 struct LSTranslator {
     delta: f64,
@@ -200,6 +201,23 @@ impl LSTranslator {
         )));
     }
 
+    fn generate_leaf(&mut self, leaf: &mut LSTLeave) {
+        assert!(leaf.len() >= 3);
+
+        use crate::scene::texture::UniformTexture;
+        use crate::scene::Triangle;
+
+        let v0 = leaf.pop().unwrap();
+        let mut prev = leaf.pop().unwrap();
+
+        while !leaf.is_empty() {
+            let next = leaf.pop().unwrap();
+            let triangle = Triangle::new((v0, prev, next), UniformTexture::new(RED, 1.0, 1.0));
+            self.res.push(Box::new(triangle));
+            prev = next;
+        }
+    }
+
     fn compute_dst(&self, state: &LSTState) -> Point {
         let dst =
             (Vector::from(ORIGIN, state.pos) + self.length * state.direction.vector()).to_point();
@@ -208,12 +226,18 @@ impl LSTranslator {
 
     fn run(mut self, initial_state: LSTState, values: &LSValues) -> LSTResult {
         let mut state = initial_state;
+        let mut leaf = LSTLeave::new();
+        let in_leaf = false;
 
         for val in values {
             match val {
                 'f' | 'F' => {
                     let dst = self.compute_dst(&state);
-                    self.add_edge(&state, dst);
+                    if !in_leaf {
+                        self.add_edge(&state, dst)
+                    } else {
+                        leaf.push(dst)
+                    }
                     state.pos = dst;
                 }
                 '+' => state.rotate_turn(self.delta),
@@ -225,6 +249,14 @@ impl LSTranslator {
                 '|' => state.rotate_turn(180f64.to_radians()),
                 '[' => self.saved_states.push(state.clone()),
                 ']' => state = self.saved_states.pop().unwrap(),
+                '{' => {
+                    assert!(leaf.is_empty());
+                    self.saved_states.push(state.clone());
+                }
+                '}' => {
+                    self.generate_leaf(&mut leaf);
+                    state = self.saved_states.pop().unwrap();
+                }
                 _ => (),
                 c => panic!("Unallowed char {}", c),
             }
