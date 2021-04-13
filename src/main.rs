@@ -136,9 +136,9 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (200, 200);
+    let (res_x, res_y) = (300, 300);
     let cam = scene::Camera::new(
-        Point(0.0, 0.0, 0.0),
+        Point(0.0, 0.0, -1.0),
         Point(0.0, 0.0, 20.0),
         Vector::new(1.0, 0.0, 0.0).normalize(),
         90.0,
@@ -163,7 +163,7 @@ fn main() {
         //Box::new(sphere! {Point(0.0, 0.0, 4.0); 0.3;
         //<uniform>(common::YELLOW, 1.0, 1.0)}),
         Box::new(
-            triangle! {Point(-10.0, 2000.0, 2000.0), Point(-10.0, -2000.0, 2000.0), Point(-10.0, -2000.0, -2000.0); <uniform>(Color(124,252,0), 1.0, 1.0)},
+            triangle! {Point(-10.0, 2000.0, 2000.0), Point(-10.0, -2000.0, 2000.0), Point(-10.0, 0.0, -2000.0); <uniform>(Color(124,252,0), 1.0, 1.0)},
         ),
     ];
 
@@ -182,7 +182,7 @@ fn main() {
     });
 
     lights.push(Box::new(scene::light::PointLight::new(
-        Point(0.0, -2.0, 0.0),
+        Point(6.0, 0.0, 12.0),
         (1.0, 1.0, 1.0),
     )));
 
@@ -201,10 +201,8 @@ fn main() {
     //let image = engine.render();
 
     let res = engine.travelling(
-        &mut |c| {
-            c.move_to(Point(0.0, 0.0, 10.0));
-        },
-        2,
+        &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
+        36,
     );
 
     save_gif(&args[1], &res);
