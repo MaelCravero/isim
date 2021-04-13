@@ -27,6 +27,20 @@ fn save_image(path: &str, image: &Image) {
     }
 }
 
+fn save_gif(path: &str, image: &Vec<Image>) {
+    let path = Path::new(&path);
+    let file = File::create(path);
+
+    if let Ok(mut file) = file {
+        match Image::save_as_gif(image, &mut file) {
+            Ok(_) => println!("Success!"),
+            _ => println!("Could not write: {}", path.display()),
+        }
+    } else {
+        println!("Could not open: {}", path.display())
+    }
+}
+
 fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer {
     let mut objs: scene::ObjectContainer = vec![Box::new(
         triangle! {Point(-10.0, 2000.0, 2000.0), Point(-10.0, -2000.0, 2000.0), Point(-10.0, -2000.0, -2000.0); <uniform>(Color(124,252,0), 1.0, 1.0)},
@@ -193,6 +207,5 @@ fn main() {
         2,
     );
 
-    save_image(&("1".to_string() + &args[1]), &res[0]);
-    save_image(&("2".to_string() + &args[1]), &res[1]);
+    save_gif(&args[1], &res);
 }
