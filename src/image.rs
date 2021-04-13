@@ -72,4 +72,32 @@ impl Image {
         }
         stream.flush()
     }
+
+    fn to_gif_frame(&self) -> gif::Frame {
+        let mut buf = Vec::new();
+        self.grid.iter().for_each(|&Color(r, g, b)| {
+            buf.push(r);
+            buf.push(g);
+            buf.push(b)
+        });
+
+        gif::Frame::from_rgb(self.width as u16, self.height as u16, &buf[..])
+    }
+
+    pub fn save_as_gif(frames: &Vec<Image>, file: &mut File) -> Result<(), gif::EncodingError> {
+        assert!(!frames.is_empty());
+
+        let width = frames[0].width;
+        let height = frames[0].height;
+
+        let mut encoder = gif::Encoder::new(file, width as u16, height as u16, &[])?;
+        encoder.set_repeat(gif::Repeat::Infinite).unwrap();
+
+        for frame in frames.iter() {
+            assert!(frame.height == height, frame.width == width);
+            encoder.write_frame(&frame.to_gif_frame()).unwrap();
+        }
+
+        Ok(())
+    }
 }
