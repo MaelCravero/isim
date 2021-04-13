@@ -13,7 +13,7 @@ use common::{Color, Point};
 use geometry::Vector;
 use image::Image;
 
-fn save_image(path: &str, image: Image) {
+fn save_image(path: &str, image: &Image) {
     let path = Path::new(&path);
     let file = File::create(path);
 
@@ -184,7 +184,15 @@ fn main() {
     //engine.set_reflection();
     //engine.set_intersect();
 
-    let image = engine.render();
+    //let image = engine.render();
 
-    save_image(&args[1], image)
+    let res = engine.travelling(
+        &mut |c| {
+            c.move_to(Point(0.0, 0.0, 10.0));
+        },
+        2,
+    );
+
+    save_image(&("1".to_string() + &args[1]), &res[0]);
+    save_image(&("2".to_string() + &args[1]), &res[1]);
 }
