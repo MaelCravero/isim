@@ -23,8 +23,8 @@ pub use scene::ObjectType;
 pub use scene::Scene;
 
 pub trait TextureMaterial {
-    fn diffusion(&self, p: Point) -> (f64, f64, f64);
-    fn specularity(&self, p: Point) -> f64;
+    fn diffusion(&self, u: f64, v: f64) -> (f64, f64, f64);
+    fn specularity(&self, x: usize, y: usize) -> f64;
 }
 
 pub trait Object {
@@ -32,6 +32,7 @@ pub trait Object {
     fn normal(&self, p: Point) -> NormalVector;
     fn diffusion(&self, p: Point) -> (f64, f64, f64);
     fn specularity(&self, p: Point) -> f64;
+    fn map_to_texture(&self, p: Point) -> (f64, f64);
 }
 
 pub trait Light {
@@ -54,6 +55,14 @@ macro_rules! sphere {
         use crate::scene::Sphere;
 
         Sphere::<UniformTexture>::new($p, $r, UniformTexture::new($c, $d, $s))
+    }};
+
+    (($x:expr, $y:expr, $z:expr); $r:expr; <uvmapped>($c:expr, $d:expr, $s:expr)) => {{
+        use crate::common::Point;
+        use crate::scene::texture::UVMapTexture;
+        use crate::scene::Sphere;
+
+        Sphere::<UVMapTexture>::new(Point($x, $y, $z), $r, UVMapTexture::new($c, $d, $s))
     }};
 }
 

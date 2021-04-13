@@ -1,4 +1,8 @@
-use crate::{common::Point, geometry::NormalVector, geometry::Vector};
+use crate::{
+    common::{Point, ORIGIN},
+    geometry::NormalVector,
+    geometry::Vector,
+};
 
 use super::{Object, Ray, TextureMaterial};
 
@@ -56,11 +60,19 @@ where
     }
 
     fn diffusion(&self, p: Point) -> (f64, f64, f64) {
-        self.texture.diffusion(p)
+        let (x, y) = self.map_to_texture(p);
+        self.texture.diffusion(x, y)
     }
 
-    fn specularity(&self, p: Point) -> f64 {
-        self.texture.specularity(p)
+    fn specularity(&self, _p: Point) -> f64 {
+        self.texture.specularity(0, 0)
+    }
+
+    fn map_to_texture(&self, p: Point) -> (f64, f64) {
+        let n = Vector::from(self.center, p).normalize().vector();
+        let u = 0.5 + n.z.atan2(n.y) * (1.0 / (2.0 * std::f64::consts::PI));
+        let v = 0.5 - n.x.asin() * (1.0 / std::f64::consts::PI);
+        (u, v)
     }
 }
 
