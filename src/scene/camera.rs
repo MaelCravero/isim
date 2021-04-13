@@ -77,4 +77,14 @@ impl Camera {
             self.width,
         );
     }
+
+    pub fn rotate_around_center_of_view(&mut self, angle: f64) {
+        //let axis = Vector::from(ORIGIN, self.center_of_view) + self.up.vector();
+        let center = Vector::from(ORIGIN, self.center_of_view);
+
+        let new_pos =
+            Vector::rotate(Vector::from(ORIGIN, self.pos) - center, &self.up, angle) + center;
+
+        self.move_to(new_pos.to_point());
+    }
 }
