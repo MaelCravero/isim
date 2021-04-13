@@ -71,13 +71,16 @@ impl LSystem {
     }
 
     pub fn generate(mut self) -> LSystem {
-        for _ in 0..self.age {
+        for i in 1..=self.age {
+            println!("Expansion {}/{}", i, self.age);
             self.expand()
         }
         self
     }
 
     pub fn from_file(path: &str) -> std::io::Result<LSystem> {
+        println!("Generating L-System from {}", path);
+
         let file = File::open(path)?;
         let mut lines = std::io::BufReader::new(file).lines();
 

@@ -198,12 +198,17 @@ fn main() {
     //engine.set_reflection();
     //engine.set_intersect();
 
-    //let image = engine.render();
+    let is_gif = args[1].contains("gif");
 
-    let res = engine.travelling(
-        &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
-        36,
-    );
+    if is_gif {
+        let res = engine.travelling(
+            &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
+            36,
+        );
+        save_gif(&args[1], &res);
+    } else {
+        let image = engine.render();
 
-    save_gif(&args[1], &res);
+        save_image(&args[1], &image);
+    }
 }
