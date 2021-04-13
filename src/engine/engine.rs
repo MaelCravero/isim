@@ -5,7 +5,7 @@ use rand::Rng;
 use crate::{
     common::*,
     image::Image,
-    scene::{Light, Object, Ray, Scene},
+    scene::{Camera, Light, Object, Ray, Scene},
 };
 
 use super::render::*;
@@ -62,6 +62,21 @@ impl Engine {
     pub fn set_reflection(&mut self) -> &mut Self {
         self.mode.push(RenderingMode::Reflection);
         self
+    }
+
+    pub fn travelling<F: FnMut(&mut Camera)>(
+        &mut self,
+        move_cam: &mut F,
+        nb_frames: usize,
+    ) -> Vec<Image> {
+        let mut res = Vec::new();
+
+        for _ in 0..nb_frames {
+            res.push(self.render());
+            move_cam(&mut self.scene.cam);
+        }
+
+        res
     }
 
     pub fn render(&self) -> Image {

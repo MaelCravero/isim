@@ -2,6 +2,10 @@ use crate::{common::*, geometry::Vector};
 
 pub struct Camera {
     pub pos: Point,
+    center_of_view: Point,
+    up: NormalVector,
+    x_fov_angle: f64,
+    y_fov_angle: f64,
     pub z_min: f64,
     pub height: usize,
     pub width: usize,
@@ -42,6 +46,10 @@ impl Camera {
 
         Camera {
             pos,
+            center_of_view,
+            up,
+            x_fov_angle,
+            y_fov_angle,
             z_min,
             height,
             width,
@@ -55,5 +63,18 @@ impl Camera {
         let pos = self.top_left - self.vunit_x * (x as f64) - self.vunit_y * (y as f64);
 
         Point(pos.x, pos.y, pos.z)
+    }
+
+    pub fn move_to(&mut self, pos: Point) {
+        *self = Camera::new(
+            pos,
+            self.center_of_view,
+            self.up,
+            self.x_fov_angle,
+            self.y_fov_angle,
+            self.z_min,
+            self.height,
+            self.width,
+        );
     }
 }
