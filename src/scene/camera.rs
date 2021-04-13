@@ -1,7 +1,4 @@
-use crate::{
-    common::{Point, ORIGIN},
-    geometry::Vector,
-};
+use crate::{common::*, geometry::Vector};
 
 pub struct Camera {
     pub pos: Point,
@@ -17,7 +14,7 @@ impl Camera {
     pub fn new(
         pos: Point,
         center_of_view: Point,
-        up: Vector,
+        up: NormalVector,
         x_fov_angle: f64,
         y_fov_angle: f64,
         z_min: f64,
@@ -29,16 +26,19 @@ impl Camera {
 
         let unit_y = w / (width as f64);
         let unit_x = h / (height as f64);
-        let vunit_y = Vector::cross_product(&up, &Vector::from(center_of_view, pos))
+
+        let vec_center = Vector::from(pos, center_of_view).normalize().vector() * z_min;
+
+        let vunit_y = Vector::cross_product(&up.vector(), &vec_center.normalize().vector())
             .normalize()
             .vector()
             * unit_y;
-        let vunit_x = up * unit_x;
+        let vunit_x = up.vector() * unit_x;
 
-        let vec_center = Vector::from(ORIGIN, center_of_view).normalize().vector() * z_min;
-
-        let top_left =
-            vec_center + vunit_y * (width as f64 / 2.0) + vunit_x * (height as f64 / 2.0);
+        let top_left = Vector::from(ORIGIN, pos)
+            + vec_center
+            + vunit_y * (width as f64 / 2.0)
+            + vunit_x * (height as f64 / 2.0);
 
         Camera {
             pos,

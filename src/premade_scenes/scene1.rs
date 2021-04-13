@@ -4,7 +4,7 @@ pub fn get(res_x: usize, res_y: usize) -> scene::Scene {
     let cam = scene::Camera::new(
         Point(0.0, 0.0, 0.0),
         Point(0.0, 0.0, 8.0),
-        Vector::new(1.0, 0.0, 0.0),
+        Vector::new(1.0, 0.0, 0.0).normalize(),
         45.0,
         45.0,
         2.0,
