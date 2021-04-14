@@ -136,9 +136,9 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (300, 300);
+    let (res_x, res_y) = (700, 700);
     let cam = scene::Camera::new(
-        Point(0.0, 0.0, -1.0),
+        Point(10.0, 10.0, -1.0),
         Point(0.0, 0.0, 20.0),
         Vector::new(1.0, 0.0, 0.0).normalize(),
         90.0,
@@ -149,21 +149,13 @@ fn main() {
     );
     let mut lights = scene::LightContainer::new();
     let mut objs: scene::ObjectContainer = vec![
-        //Box::new(sphere! {(0.0, 1.5, 11.0); 1.0; <uniform>(common::RED, 1.0, 1.0)}),
-        //Box::new(
-        //triangle! {Point(0.0, 0.0, 6.0), Point(0.0, -1.0, 6.0), Point(-1.0, 1.0, 6.0);
-        //<uniform>(common::BLUE, 1.0, 1.0)},
-        //),
-        //Box::new(
-        //cylinder! {Point(0.0, 1.5, 11.0), Point(4.0, 5.5, 11.0); 0.7;
-        //<uniform>(common::GREEN, 1.0, 1.0)},
-        //),
-        //Box::new(cylinder! {Point(0.0, 0.0, 4.0), Point(0.0, 0.0, 16.0); 0.3;
-        //<uniform>(common::YELLOW, 1.0, 1.0)}),
-        //Box::new(sphere! {Point(0.0, 0.0, 4.0); 0.3;
-        //<uniform>(common::YELLOW, 1.0, 1.0)}),
         Box::new(
-            triangle! {Point(-10.0, 2000.0, 2000.0), Point(-10.0, -2000.0, 2000.0), Point(-10.0, 0.0, -2000.0); <uniform>(Color(124,252,0), 1.0, 1.0)},
+            triangle! {Point(-10.0, 10.0, 30.0), Point(-10.0, 10.0, 10.0), Point(-10.0, -10.0, 30.0);
+            <uniform>(Color(166,166,166), 1.0, 1.0)},
+        ),
+        Box::new(
+            triangle! {Point(-10.0, -10.0, 10.0), Point(-10.0, 10.0, 10.0), Point(-10.0, -10.0, 30.0);
+            <uniform>(Color(166,166,166), 1.0, 1.0)},
         ),
     ];
 
@@ -194,7 +186,7 @@ fn main() {
 
     engine.set_diffuse();
     engine.set_specular();
-    engine.set_ambient((0.1, 0.1, 0.12));
+    engine.set_ambient((0.4, 0.4, 0.4));
     //engine.set_reflection();
     //engine.set_intersect();
 
