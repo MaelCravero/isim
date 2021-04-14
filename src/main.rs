@@ -49,85 +49,103 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
     objs.append({
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
-        &mut lsystem.translate(
-            Point(-10.0, 0.0, 20.0),
-            //Point(-10.0, 10.0, 30.0),
-            Vector::new(1.0, 0.0, 0.0).normalize(),
-            Vector::new(0.0, -1.0, 0.0).normalize(),
-            //Vector::new(1.0, -1.0, -1.0).normalize(),
-            0.5,
-            0.5,
-        )
+        &mut lsystem
+            .translate(
+                Point(-10.0, 0.0, 20.0),
+                //Point(-10.0, 10.0, 30.0),
+                Vector::new(1.0, 0.0, 0.0).normalize(),
+                Vector::new(0.0, -1.0, 0.0).normalize(),
+                //Vector::new(1.0, -1.0, -1.0).normalize(),
+                0.5,
+                0.5,
+            )
+            .last_mut()
+            .unwrap()
     });
 
     objs.append({
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
-        &mut lsystem.translate(
-            Point(-10.0, 4.0, 25.0),
-            //Point(-10.0, 10.0, 30.0),
-            Vector::new(1.0, 0.0, 0.0).normalize(),
-            Vector::new(0.0, -1.0, 0.0).normalize(),
-            //Vector::new(1.0, -1.0, -1.0).normalize(),
-            0.4,
-            0.1,
-        )
+        &mut lsystem
+            .translate(
+                Point(-10.0, 4.0, 25.0),
+                //Point(-10.0, 10.0, 30.0),
+                Vector::new(1.0, 0.0, 0.0).normalize(),
+                Vector::new(0.0, -1.0, 0.0).normalize(),
+                //Vector::new(1.0, -1.0, -1.0).normalize(),
+                0.4,
+                0.1,
+            )
+            .last_mut()
+            .unwrap()
     });
 
     objs.append({
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
-        &mut lsystem.translate(
-            Point(-10.0, -8.0, 24.0),
-            //Point(-10.0, 10.0, 30.0),
-            Vector::new(1.0, 0.0, 0.0).normalize(),
-            Vector::new(0.0, -1.0, 0.0).normalize(),
-            //Vector::new(1.0, -1.0, -1.0).normalize(),
-            0.3,
-            0.1,
-        )
+        &mut lsystem
+            .translate(
+                Point(-10.0, -8.0, 24.0),
+                //Point(-10.0, 10.0, 30.0),
+                Vector::new(1.0, 0.0, 0.0).normalize(),
+                Vector::new(0.0, -1.0, 0.0).normalize(),
+                //Vector::new(1.0, -1.0, -1.0).normalize(),
+                0.3,
+                0.1,
+            )
+            .last_mut()
+            .unwrap()
     });
 
     objs.append({
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
-        &mut lsystem.translate(
-            Point(-10.0, -8.0, 16.0),
-            //Point(-10.0, 10.0, 30.0),
-            Vector::new(1.0, 0.0, 0.0).normalize(),
-            Vector::new(0.0, -1.0, 0.0).normalize(),
-            //Vector::new(1.0, -1.0, -1.0).normalize(),
-            0.3,
-            0.1,
-        )
+        &mut lsystem
+            .translate(
+                Point(-10.0, -8.0, 16.0),
+                //Point(-10.0, 10.0, 30.0),
+                Vector::new(1.0, 0.0, 0.0).normalize(),
+                Vector::new(0.0, -1.0, 0.0).normalize(),
+                //Vector::new(1.0, -1.0, -1.0).normalize(),
+                0.3,
+                0.1,
+            )
+            .last_mut()
+            .unwrap()
     });
 
     objs.append({
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
-        &mut lsystem.translate(
-            Point(-10.0, 3.0, 21.0),
-            //Point(-10.0, 10.0, 30.0),
-            Vector::new(1.0, 0.0, 0.0).normalize(),
-            Vector::new(0.0, -1.0, 0.0).normalize(),
-            //Vector::new(1.0, -1.0, -1.0).normalize(),
-            0.4,
-            0.1,
-        )
+        &mut lsystem
+            .translate(
+                Point(-10.0, 3.0, 21.0),
+                //Point(-10.0, 10.0, 30.0),
+                Vector::new(1.0, 0.0, 0.0).normalize(),
+                Vector::new(0.0, -1.0, 0.0).normalize(),
+                //Vector::new(1.0, -1.0, -1.0).normalize(),
+                0.4,
+                0.1,
+            )
+            .last_mut()
+            .unwrap()
     });
 
     objs.append({
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
-        &mut lsystem.translate(
-            Point(-10.0, 3.0, 32.0),
-            //Point(-10.0, 10.0, 30.0),
-            Vector::new(1.0, 0.0, 0.0).normalize(),
-            Vector::new(0.0, -1.0, 0.0).normalize(),
-            //Vector::new(1.0, -1.0, -1.0).normalize(),
-            0.4,
-            0.1,
-        )
+        &mut lsystem
+            .translate(
+                Point(-10.0, 3.0, 32.0),
+                //Point(-10.0, 10.0, 30.0),
+                Vector::new(1.0, 0.0, 0.0).normalize(),
+                Vector::new(0.0, -1.0, 0.0).normalize(),
+                //Vector::new(1.0, -1.0, -1.0).normalize(),
+                0.4,
+                0.1,
+            )
+            .last_mut()
+            .unwrap()
     });
 
     objs
@@ -136,9 +154,9 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (700, 700);
+    let (res_x, res_y) = (200, 200);
     let cam = scene::Camera::new(
-        Point(10.0, 10.0, -1.0),
+        Point(0.0, 0.0, -1.0),
         Point(0.0, 0.0, 20.0),
         Vector::new(1.0, 0.0, 0.0).normalize(),
         90.0,
@@ -170,7 +188,7 @@ fn main() {
             //Vector::new(1.0, -1.0, -1.0).normalize(),
             0.5,
             0.1,
-        )
+        )[args[3].parse::<usize>().unwrap()]
     });
 
     lights.push(Box::new(scene::light::PointLight::new(

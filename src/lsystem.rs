@@ -124,6 +124,10 @@ impl ToString for LSystem {
     }
 }
 
+use crate::scene::ObjectContainer;
+
+type LSTResult = Vec<ObjectContainer>;
+
 impl LSystem {
     pub fn translate(
         self,
@@ -132,19 +136,18 @@ impl LSystem {
         right: NormalVector,
         length: f64,
         radius: f64,
-    ) -> crate::scene::ObjectContainer {
+    ) -> LSTResult {
         let state = LSTState {
             pos,
             direction,
             right,
             color: 0,
             radius,
+            obj_index: 0,
         };
         LSTranslator::new(self.delta, length, self.color_table).run(state, &self.value)
     }
 }
-
-use crate::scene::ObjectContainer as LSTResult;
 
 #[derive(Debug, Clone, Copy)]
 struct LSTState {
@@ -153,6 +156,7 @@ struct LSTState {
     right: NormalVector,
     color: usize,
     radius: f64,
+    obj_index: usize,
 }
 
 impl LSTState {
@@ -216,12 +220,15 @@ impl LSTranslator {
         use crate::scene::texture::UniformTexture;
         use crate::scene::Cylinder;
 
-        self.res.push(Box::new(Cylinder::new(
-            state.pos,
-            dst,
-            state.radius,
-            UniformTexture::new(self.get_color(&state), 1.0, 1.0),
-        )));
+        for i in state.obj_index..self.res.len() {
+            let cylinder = Cylinder::new(
+                state.pos,
+                dst,
+                state.radius,
+                UniformTexture::new(self.get_color(&state), 1.0, 1.0),
+            );
+            self.res[i].push(Box::new(cylinder));
+        }
     }
 
     fn generate_leaf(&mut self, state: &LSTState, leaf: &mut LSTLeave) {
@@ -235,11 +242,13 @@ impl LSTranslator {
 
         while !leaf.is_empty() {
             let next = leaf.pop().unwrap();
-            let triangle = Triangle::new(
-                (v0, prev, next),
-                UniformTexture::new(self.get_color(&state), 1.0, 1.0),
-            );
-            self.res.push(Box::new(triangle));
+            for i in state.obj_index..self.res.len() {
+                let triangle = Triangle::new(
+                    (v0, prev, next),
+                    UniformTexture::new(self.get_color(&state), 1.0, 1.0),
+                );
+                self.res[i].push(Box::new(triangle));
+            }
             prev = next;
         }
     }
@@ -250,10 +259,31 @@ impl LSTranslator {
         dst
     }
 
+    fn compute_res_size(&mut self, values: &LSValues) {
+        let mut size = 0;
+        self.res.push(Vec::new());
+
+        for val in values {
+            match val {
+                '[' => {
+                    size += 1;
+                    if size == self.res.len() {
+                        self.res.push(Vec::new());
+                        println!("LSystem steps increased to {}", size);
+                    }
+                }
+                ']' => size -= 1,
+                _ => (),
+            }
+        }
+    }
+
     fn run(mut self, initial_state: LSTState, values: &LSValues) -> LSTResult {
         let mut state = initial_state;
         let mut leaf = LSTLeave::new();
         let mut in_leaf = false;
+
+        self.compute_res_size(values);
 
         for val in values {
             match val {
@@ -275,7 +305,10 @@ impl LSTranslator {
                 '\\' => state.rotate_roll(self.delta),
                 '/' => state.rotate_roll(-self.delta),
                 '|' => state.rotate_turn(180f64.to_radians()),
-                '[' => self.saved_states.push(state.clone()),
+                '[' => {
+                    self.saved_states.push(state.clone());
+                    state.obj_index += 1;
+                }
                 ']' => state = self.saved_states.pop().unwrap(),
                 '{' => {
                     assert!(leaf.is_empty());
