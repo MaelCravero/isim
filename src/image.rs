@@ -84,7 +84,11 @@ impl Image {
         gif::Frame::from_rgb(self.width as u16, self.height as u16, &buf[..])
     }
 
-    pub fn save_as_gif(frames: &Vec<Image>, file: &mut File) -> Result<(), gif::EncodingError> {
+    pub fn save_as_gif(
+        frames: &Vec<Image>,
+        file: &mut File,
+        speed: usize,
+    ) -> Result<(), gif::EncodingError> {
         assert!(!frames.is_empty());
 
         let width = frames[0].width;
@@ -95,7 +99,7 @@ impl Image {
 
         for frame in frames.iter() {
             assert!(frame.height == height, frame.width == width);
-            encoder.write_frame(&frame.to_gif_frame()).unwrap();
+            (0..speed).for_each(|_| encoder.write_frame(&frame.to_gif_frame()).unwrap());
         }
 
         Ok(())

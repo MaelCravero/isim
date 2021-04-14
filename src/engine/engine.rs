@@ -92,8 +92,10 @@ impl Engine {
         for i in 1..=nb {
             println!("Rendering step {}/{}", i, nb);
             self.scene.objects = steps.remove(0);
-            let mut step = self.travelling(move_cam, nb_frames);
-            res.append(&mut step);
+            for _ in 0..(if steps.is_empty() { 4 } else { 1 }) {
+                let mut step = self.travelling(move_cam, nb_frames);
+                res.append(&mut step);
+            }
         }
 
         res
