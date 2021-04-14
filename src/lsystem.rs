@@ -267,6 +267,35 @@ impl LSTranslator {
         self.color_table[state.color].clone()
     }
 
+    fn add_fruit(&mut self, state: &LSTState) {
+        use crate::scene::texture::UVMapTexture;
+        use crate::scene::texture::UniformTexture;
+        use crate::scene::Sphere;
+
+        const FRUIT_RADIUS: f64 = 2.5;
+
+        for i in state.obj_index..self.res.len() {
+            match self.get_material(&state) {
+                LSMaterial::Uniform(c) => {
+                    let sphere = Sphere::new(
+                        state.pos,
+                        self.length / FRUIT_RADIUS,
+                        UniformTexture::new(c, 1.0, 0.7),
+                    );
+                    self.res[i].push(Box::new(sphere));
+                }
+                LSMaterial::Texture(t) => {
+                    let sphere = Sphere::new(
+                        state.pos,
+                        self.length / FRUIT_RADIUS,
+                        UVMapTexture::new(t, 1.0, 0.7),
+                    );
+                    self.res[i].push(Box::new(sphere));
+                }
+            }
+        }
+    }
+
     fn add_edge(&mut self, state: &LSTState, dst: Point) {
         use crate::scene::texture::UVMapTexture;
         use crate::scene::texture::UniformTexture;
@@ -370,6 +399,11 @@ impl LSTranslator {
                         }
                     }
                     state.pos = dst;
+                }
+                '@' => {
+                    if state.obj_index >= self.trunk as usize {
+                        self.add_fruit(&state);
+                    }
                 }
                 '!' => state.radius *= self.radius_decrease,
                 '\'' => state.increase_color(self.color_table.len()),

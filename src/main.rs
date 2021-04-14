@@ -13,7 +13,7 @@ use common::{Color, Point};
 use geometry::Vector;
 use image::Image;
 
-const GIF_SPEED: usize = 18;
+const GIF_SPEED: usize = 2;
 
 fn save_image(path: &str, image: &Image) {
     let path = Path::new(&path);
@@ -150,9 +150,9 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (800, 800);
+    let (res_x, res_y) = (1000, 1000);
     let cam = scene::Camera::new(
-        Point(10.0, 0.0, 7.0),
+        Point(4.0, 0.0, -1.0),
         Point(0.0, 0.0, 20.0),
         Vector::new(1.0, 0.0, 0.0).normalize(),
         90.0,
@@ -234,9 +234,9 @@ fn main() {
             36,
         );*/
         let res = engine.render_growth(
-            //&mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
-            &mut |_| (),
-            1,
+            &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
+            //&mut |_| (),
+            9,
             plants,
         );
         save_gif(&args[1], &res);
