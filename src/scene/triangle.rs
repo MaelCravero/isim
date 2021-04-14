@@ -63,39 +63,25 @@ where
             return None;
         }
         return Some(t);
-
-        /*let plane_distance =
-            Vector::dot_product(&n.vector(), &Vector::from(ORIGIN, self.points.0));
-        let distance = Vector::dot_product(&n.vector(), &Vector::from(ORIGIN, ray.origin))
-            + plane_distance / a;
-
-        if distance < 0.0 {
-            return None;
-        }
-
-        let intersection = Vector::from(ORIGIN, ray.origin) + ray.direction.vector() * distance;
-
-        if self.is_inside(intersection.to_point()) {
-            Some(distance)
-        } else {
-            None
-        }*/
     }
 
     fn normal(&self, _p: Point) -> NormalVector {
-        // Makes no use of p, might be a problem
         let (a, b, c) = self.points;
         let ab = Vector::from(a, b);
         let ac = Vector::from(a, c);
         Vector::cross_product(&ab, &ac).normalize()
     }
 
-    fn diffusion(&self, p: Point) -> (f64, f64, f64) {
-        self.texture.diffusion(p)
+    fn diffusion(&self, _p: Point) -> (f64, f64, f64) {
+        self.texture.diffusion(0.0, 0.0)
     }
 
-    fn specularity(&self, p: Point) -> f64 {
-        self.texture.specularity(p)
+    fn specularity(&self, _p: Point) -> f64 {
+        self.texture.specularity(0, 0)
+    }
+
+    fn map_to_texture(&self, p: Point) -> (f64, f64) {
+        (0.0, 0.0)
     }
 }
 

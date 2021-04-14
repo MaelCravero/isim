@@ -86,4 +86,12 @@ macro_rules! cylinder {
 
         Cylinder::<UniformTexture>::new($a, $b, $r, UniformTexture::new($c, $d, $s))
     }};
+
+    ($a:expr, $b:expr; $r:expr; <uvmapped>($c:expr, $d:expr, $s:expr)) => {{
+        use crate::common::Point;
+        use crate::scene::texture::UVMapTexture;
+        use crate::scene::Cylinder;
+
+        Cylinder::<UVMapTexture>::new($a, $b, $r, UVMapTexture::new($c, $d, $s))
+    }};
 }

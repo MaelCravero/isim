@@ -1,14 +1,15 @@
 use crate::common::*;
+use std::cell::UnsafeCell;
 
 use super::{Object, Ray, TextureMaterial};
 
-#[derive(Debug, Clone)]
 pub struct Cylinder<T: TextureMaterial> {
     a: Point,
     b: Point,
     r: f64,
     texture: T,
     direction: NormalVector,
+    ref_normal: UnsafeCell<Option<NormalVector>>,
 }
 
 impl<T> Cylinder<T>
@@ -23,6 +24,7 @@ where
             r,
             texture,
             direction,
+            ref_normal: UnsafeCell::new(None),
         }
     }
 }
@@ -108,10 +110,26 @@ where
     }
 
     fn specularity(&self, p: Point) -> f64 {
-        self.texture.specularity(p)
+        self.texture.specularity(0, 0)
     }
 
     fn diffusion(&self, p: Point) -> (f64, f64, f64) {
-        self.texture.diffusion(p)
+        let (u, v) = self.map_to_texture(p);
+        self.texture.diffusion(u, v)
+    }
+
+    fn map_to_texture(&self, p: Point) -> (f64, f64) {
+        unsafe {
+            let n = self.direction.vector();
+            let ptr = self.ref_normal.get();
+            if (*ptr).is_none() {
+                *ptr = Some(Vector::cross_product(&self.normal(p).vector(), &n).normalize())
+            }
+            let v = Vector::dot_product(&Vector::from(self.a, p), &n)
+                / (Vector::from(self.a, self.b).norm());
+            let u = NormalVector::dot_product(&(*ptr).unwrap(), &self.normal(p)).acos()
+                / (std::f64::consts::PI);
+            (u, v)
+        }
     }
 }
