@@ -21,15 +21,28 @@ pub struct LSystem {
     rules: LSRules,
     age: u64,
     delta: f64,
+    trunk: u64,
+    radius: f64,
+    radius_decrease: f64,
     color_table: LSColorTable,
 }
 
 impl LSystem {
-    pub fn new(axioms: LSValues, age: u64, delta: f64) -> LSystem {
+    pub fn new(
+        axioms: LSValues,
+        age: u64,
+        delta: f64,
+        trunk: u64,
+        radius: f64,
+        radius_decrease: f64,
+    ) -> LSystem {
         LSystem {
             value: axioms,
             age,
             delta,
+            trunk,
+            radius,
+            radius_decrease,
             rules: LSRules::new(),
             color_table: LSColorTable::new(),
         }
@@ -93,6 +106,9 @@ impl LSystem {
         // Prelude
         let age = lines.next().unwrap()?.parse::<u64>().unwrap();
         let delta = lines.next().unwrap()?.parse::<f64>().unwrap().to_radians();
+        let trunk = lines.next().unwrap()?.parse::<u64>().unwrap();
+        let radius = lines.next().unwrap()?.parse::<f64>().unwrap();
+        let radius_decrease = lines.next().unwrap()?.parse::<f64>().unwrap();
 
         let mut colors = LSColorTable::new();
 
@@ -112,7 +128,15 @@ impl LSystem {
         // End of prelude
         let axioms = lines.next().unwrap()?;
 
-        let mut res = LSystem::new(axioms.chars().collect(), age, delta).with_colors(colors);
+        let mut res = LSystem::new(
+            axioms.chars().collect(),
+            age,
+            delta,
+            trunk,
+            radius,
+            radius_decrease,
+        )
+        .with_colors(colors);
 
         for rule in lines {
             let mut chars: LSValues = rule?.chars().collect();
@@ -146,17 +170,23 @@ impl LSystem {
         direction: NormalVector,
         right: NormalVector,
         length: f64,
-        radius: f64,
     ) -> LSTResult {
         let state = LSTState {
             pos,
             direction,
             right,
             color: 0,
-            radius,
+            radius: self.radius,
             obj_index: 0,
         };
-        LSTranslator::new(self.delta, length, self.color_table).run(state, &self.value)
+        LSTranslator::new(
+            self.delta,
+            self.trunk,
+            length,
+            self.radius_decrease,
+            self.color_table,
+        )
+        .run(state, &self.value)
     }
 }
 
@@ -206,17 +236,27 @@ type LSTLeave = Vec<Point>;
 
 struct LSTranslator {
     delta: f64,
+    trunk: u64,
     length: f64,
+    radius_decrease: f64,
     saved_states: LSTStack,
     color_table: LSColorTable,
     res: LSTResult,
 }
 
 impl LSTranslator {
-    fn new(delta: f64, length: f64, color_table: LSColorTable) -> LSTranslator {
+    fn new(
+        delta: f64,
+        trunk: u64,
+        length: f64,
+        radius_decrease: f64,
+        color_table: LSColorTable,
+    ) -> LSTranslator {
         LSTranslator {
             delta,
+            trunk,
             length,
+            radius_decrease,
             saved_states: LSTStack::new(),
             color_table,
             res: LSTResult::new(),
@@ -325,11 +365,13 @@ impl LSTranslator {
                     if !in_leaf {
                         self.add_edge(&state, dst)
                     } else {
-                        leaf.push(dst)
+                        if state.obj_index >= self.trunk as usize {
+                            leaf.push(dst)
+                        }
                     }
                     state.pos = dst;
                 }
-                '!' => state.radius /= 1.5,
+                '!' => state.radius *= self.radius_decrease,
                 '\'' => state.increase_color(self.color_table.len()),
                 '+' => state.rotate_turn(self.delta),
                 '-' => state.rotate_turn(-self.delta),
@@ -349,7 +391,9 @@ impl LSTranslator {
                     in_leaf = true;
                 }
                 '}' => {
-                    self.generate_leaf(&state, &mut leaf);
+                    if state.obj_index >= self.trunk as usize {
+                        self.generate_leaf(&state, &mut leaf);
+                    }
                     //state = self.saved_states.pop().unwrap();
                     in_leaf = false;
                 }
@@ -368,7 +412,7 @@ mod tests {
 
     #[test]
     fn basic_algae() {
-        let mut lsystem = LSystem::new(vec!['a'], 0, 0.0);
+        let mut lsystem = LSystem::new(vec!['a'], 0, 0.0, 0, 0.0, 0.0);
         lsystem.add_rule('a', vec!['a', 'b']);
         lsystem.add_rule('b', vec!['a']);
 

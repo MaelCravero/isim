@@ -59,7 +59,6 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
                 Vector::new(0.0, -1.0, 0.0).normalize(),
                 //Vector::new(1.0, -1.0, -1.0).normalize(),
                 0.5,
-                0.5,
             )
             .last_mut()
             .unwrap()
@@ -76,7 +75,6 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
                 Vector::new(0.0, -1.0, 0.0).normalize(),
                 //Vector::new(1.0, -1.0, -1.0).normalize(),
                 0.4,
-                0.1,
             )
             .last_mut()
             .unwrap()
@@ -93,7 +91,6 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
                 Vector::new(0.0, -1.0, 0.0).normalize(),
                 //Vector::new(1.0, -1.0, -1.0).normalize(),
                 0.3,
-                0.1,
             )
             .last_mut()
             .unwrap()
@@ -110,7 +107,6 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
                 Vector::new(0.0, -1.0, 0.0).normalize(),
                 //Vector::new(1.0, -1.0, -1.0).normalize(),
                 0.3,
-                0.1,
             )
             .last_mut()
             .unwrap()
@@ -127,7 +123,6 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
                 Vector::new(0.0, -1.0, 0.0).normalize(),
                 //Vector::new(1.0, -1.0, -1.0).normalize(),
                 0.4,
-                0.1,
             )
             .last_mut()
             .unwrap()
@@ -144,7 +139,6 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
                 Vector::new(0.0, -1.0, 0.0).normalize(),
                 //Vector::new(1.0, -1.0, -1.0).normalize(),
                 0.4,
-                0.1,
             )
             .last_mut()
             .unwrap()
@@ -156,9 +150,9 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (1000, 1000);
+    let (res_x, res_y) = (800, 800);
     let cam = scene::Camera::new(
-        Point(10.0, 0.0, -1.0),
+        Point(10.0, 0.0, 7.0),
         Point(0.0, 0.0, 20.0),
         Vector::new(1.0, 0.0, 0.0).normalize(),
         90.0,
@@ -198,13 +192,12 @@ fn main() {
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
         &mut lsystem.translate(
-            Point(-18.0, 0.0, 30.0),
+            Point(-10.0, 0.0, 20.0),
             //Point(-10.0, 10.0, 30.0),
             Vector::new(1.0, 0.0, 0.0).normalize(),
             Vector::new(0.0, -1.0, 0.0).normalize(),
             //Vector::new(1.0, -1.0, -1.0).normalize(),
             0.5,
-            0.3,
         )
     };
 
