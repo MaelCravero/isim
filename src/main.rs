@@ -198,13 +198,13 @@ fn main() {
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
         &mut lsystem.translate(
-            Point(-15.0, 0.0, 20.0),
+            Point(-18.0, 0.0, 30.0),
             //Point(-10.0, 10.0, 30.0),
             Vector::new(1.0, 0.0, 0.0).normalize(),
             Vector::new(0.0, -1.0, 0.0).normalize(),
             //Vector::new(1.0, -1.0, -1.0).normalize(),
             0.5,
-            0.1,
+            0.3,
         )
     };
 
@@ -212,10 +212,10 @@ fn main() {
         Point(6.0, -15.0, 12.0),
         (1.0, 1.0, 1.0),
     )));
-    lights.push(Box::new(scene::light::PointLight::new(
-        Point(6.0, 5.0, 12.0),
-        (1.0, 1.0, 1.0),
-    )));
+    //lights.push(Box::new(scene::light::PointLight::new(
+    //Point(6.0, 5.0, 12.0),
+    //(1.0, 1.0, 1.0),
+    //)));
 
     let is_gif = args[1].contains("gif");
 

@@ -7,7 +7,13 @@ type LSConstant = char;
 
 type LSValues = Vec<LSConstant>;
 type LSRules = HashMap<LSConstant, Vec<LSValues>>;
-type LSColorTable = Vec<Color>;
+
+#[derive(Debug, Clone)]
+pub enum LSMaterial {
+    Uniform(Color),
+    Texture(String),
+}
+type LSColorTable = Vec<LSMaterial>;
 
 #[derive(Debug, Clone)]
 pub struct LSystem {
@@ -42,8 +48,8 @@ impl LSystem {
         }
     }
 
-    pub fn add_color(&mut self, color: Color) {
-        self.color_table.push(color)
+    pub fn add_material(&mut self, mat: LSMaterial) {
+        self.color_table.push(mat)
     }
 
     pub fn with_colors(self, color_table: LSColorTable) -> LSystem {
@@ -91,11 +97,16 @@ impl LSystem {
         let mut colors = LSColorTable::new();
 
         for val in lines.next().unwrap()?.split_whitespace() {
-            let r = u8::from_str_radix(&val[0..2], 16).unwrap();
-            let g = u8::from_str_radix(&val[2..4], 16).unwrap();
-            let b = u8::from_str_radix(&val[4..6], 16).unwrap();
+            colors.push(match u32::from_str_radix(&val[0..6], 16) {
+                Ok(_) => {
+                    let r = u8::from_str_radix(&val[0..2], 16).unwrap();
+                    let g = u8::from_str_radix(&val[2..4], 16).unwrap();
+                    let b = u8::from_str_radix(&val[4..6], 16).unwrap();
 
-            colors.push(Color(r, g, b))
+                    LSMaterial::Uniform(Color(r, g, b))
+                }
+                Err(_) => LSMaterial::Texture(val.to_string()),
+            })
         }
 
         // End of prelude
@@ -212,28 +223,43 @@ impl LSTranslator {
         }
     }
 
-    fn get_color(&self, state: &LSTState) -> Color {
-        self.color_table[state.color]
+    fn get_material(&self, state: &LSTState) -> LSMaterial {
+        self.color_table[state.color].clone()
     }
 
     fn add_edge(&mut self, state: &LSTState, dst: Point) {
+        use crate::scene::texture::UVMapTexture;
         use crate::scene::texture::UniformTexture;
         use crate::scene::Cylinder;
 
         for i in state.obj_index..self.res.len() {
-            let cylinder = Cylinder::new(
-                state.pos,
-                dst,
-                state.radius,
-                UniformTexture::new(self.get_color(&state), 1.0, 1.0),
-            );
-            self.res[i].push(Box::new(cylinder));
+            match self.get_material(&state) {
+                LSMaterial::Uniform(c) => {
+                    let cylinder = Cylinder::new(
+                        state.pos,
+                        dst,
+                        state.radius,
+                        UniformTexture::new(c, 1.0, 0.3),
+                    );
+                    self.res[i].push(Box::new(cylinder));
+                }
+                LSMaterial::Texture(t) => {
+                    let cylinder = Cylinder::new(
+                        state.pos,
+                        dst,
+                        state.radius,
+                        UVMapTexture::new(t, 1.0, 0.3),
+                    );
+                    self.res[i].push(Box::new(cylinder));
+                }
+            };
         }
     }
 
     fn generate_leaf(&mut self, state: &LSTState, leaf: &mut LSTLeave) {
         assert!(leaf.len() >= 3);
 
+        use crate::scene::texture::UVMapTexture;
         use crate::scene::texture::UniformTexture;
         use crate::scene::Triangle;
 
@@ -243,11 +269,18 @@ impl LSTranslator {
         while !leaf.is_empty() {
             let next = leaf.pop().unwrap();
             for i in state.obj_index..self.res.len() {
-                let triangle = Triangle::new(
-                    (v0, prev, next),
-                    UniformTexture::new(self.get_color(&state), 1.0, 1.0),
-                );
-                self.res[i].push(Box::new(triangle));
+                match self.get_material(&state) {
+                    LSMaterial::Uniform(c) => {
+                        let triangle =
+                            Triangle::new((v0, prev, next), UniformTexture::new(c, 1.0, 0.4));
+                        self.res[i].push(Box::new(triangle));
+                    }
+                    LSMaterial::Texture(t) => {
+                        let triangle =
+                            Triangle::new((v0, prev, next), UVMapTexture::new(t, 1.0, 0.4));
+                        self.res[i].push(Box::new(triangle));
+                    }
+                };
             }
             prev = next;
         }
