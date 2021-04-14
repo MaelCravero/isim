@@ -10,7 +10,7 @@ use crate::{
 
 use super::render::*;
 
-const ANTI_ALIASING_NB: i32 = 4;
+const ANTI_ALIASING_NB: i32 = 1;
 const ANTI_ALIASING_DELTA: f64 = 0.001;
 
 enum RenderingMode {
@@ -71,7 +71,8 @@ impl Engine {
     ) -> Vec<Image> {
         let mut res = Vec::new();
 
-        for _ in 0..nb_frames {
+        for i in 1..=nb_frames {
+            println!("Processing frame {}/{}", i, nb_frames);
             res.push(self.render());
             move_cam(&mut self.scene.cam);
         }
