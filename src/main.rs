@@ -13,6 +13,8 @@ use common::{Color, Point};
 use geometry::Vector;
 use image::Image;
 
+const GIF_SPEED: usize = 18;
+
 fn save_image(path: &str, image: &Image) {
     let path = Path::new(&path);
     let file = File::create(path);
@@ -32,7 +34,7 @@ fn save_gif(path: &str, image: &Vec<Image>) {
     let file = File::create(path);
 
     if let Ok(mut file) = file {
-        match Image::save_as_gif(image, &mut file) {
+        match Image::save_as_gif(image, &mut file, GIF_SPEED) {
             Ok(_) => println!("Success!"),
             _ => println!("Could not write: {}", path.display()),
         }
@@ -154,9 +156,9 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (200, 200);
+    let (res_x, res_y) = (1000, 1000);
     let cam = scene::Camera::new(
-        Point(0.0, 0.0, -1.0),
+        Point(10.0, 0.0, -1.0),
         Point(0.0, 0.0, 20.0),
         Vector::new(1.0, 0.0, 0.0).normalize(),
         90.0,
@@ -196,7 +198,7 @@ fn main() {
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
         &mut lsystem.translate(
-            Point(-10.0, 0.0, 20.0),
+            Point(-15.0, 0.0, 20.0),
             //Point(-10.0, 10.0, 30.0),
             Vector::new(1.0, 0.0, 0.0).normalize(),
             Vector::new(0.0, -1.0, 0.0).normalize(),
@@ -207,11 +209,21 @@ fn main() {
     };
 
     lights.push(Box::new(scene::light::PointLight::new(
-        Point(6.0, 0.0, 12.0),
+        Point(6.0, -15.0, 12.0),
+        (1.0, 1.0, 1.0),
+    )));
+    lights.push(Box::new(scene::light::PointLight::new(
+        Point(6.0, 5.0, 12.0),
         (1.0, 1.0, 1.0),
     )));
 
-    let scene = scene::Scene::new(cam, lights, objs);
+    let is_gif = args[1].contains("gif");
+
+    let scene = scene::Scene::new(
+        cam,
+        lights,
+        if is_gif { objs } else { plants.pop().unwrap() },
+    );
 
     let mut engine = engine::Engine::new(scene);
     //let mut engine = engine::Engine::new(premade_scenes::scene1::get(res_x, res_y));
@@ -223,16 +235,15 @@ fn main() {
     //engine.set_reflection();
     //engine.set_intersect();
 
-    let is_gif = args[1].contains("gif");
-
     if is_gif {
         /*let res = engine.travelling(
             &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
             36,
         );*/
         let res = engine.render_growth(
-            &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
-            9,
+            //&mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
+            &mut |_| (),
+            1,
             plants,
         );
         save_gif(&args[1], &res);
