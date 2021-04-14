@@ -177,6 +177,7 @@ fn main() {
         ),
     ];
 
+    /*
     objs.append({
         let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
 
@@ -190,6 +191,20 @@ fn main() {
             0.1,
         )[args[3].parse::<usize>().unwrap()]
     });
+    */
+    let plants = {
+        let lsystem = lsystem::LSystem::from_file(&args[2]).unwrap().generate();
+
+        &mut lsystem.translate(
+            Point(-10.0, 0.0, 20.0),
+            //Point(-10.0, 10.0, 30.0),
+            Vector::new(1.0, 0.0, 0.0).normalize(),
+            Vector::new(0.0, -1.0, 0.0).normalize(),
+            //Vector::new(1.0, -1.0, -1.0).normalize(),
+            0.5,
+            0.1,
+        )
+    };
 
     lights.push(Box::new(scene::light::PointLight::new(
         Point(6.0, 0.0, 12.0),
@@ -211,9 +226,14 @@ fn main() {
     let is_gif = args[1].contains("gif");
 
     if is_gif {
-        let res = engine.travelling(
+        /*let res = engine.travelling(
             &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
             36,
+        );*/
+        let res = engine.render_growth(
+            &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
+            9,
+            plants,
         );
         save_gif(&args[1], &res);
     } else {

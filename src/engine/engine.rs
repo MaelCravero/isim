@@ -5,7 +5,7 @@ use rand::Rng;
 use crate::{
     common::*,
     image::Image,
-    scene::{Camera, Light, Object, Ray, Scene},
+    scene::{Camera, Light, Object, ObjectContainer, Ray, Scene},
 };
 
 use super::render::*;
@@ -75,6 +75,25 @@ impl Engine {
             println!("Processing frame {}/{}", i, nb_frames);
             res.push(self.render());
             move_cam(&mut self.scene.cam);
+        }
+
+        res
+    }
+
+    pub fn render_growth<F: FnMut(&mut Camera)>(
+        &mut self,
+        move_cam: &mut F,
+        nb_frames: usize,
+        steps: &mut Vec<ObjectContainer>,
+    ) -> Vec<Image> {
+        let mut res = Vec::new();
+
+        let nb = steps.len();
+        for i in 1..=nb {
+            println!("Rendering step {}/{}", i, nb);
+            self.scene.objects = steps.remove(0);
+            let mut step = self.travelling(move_cam, nb_frames);
+            res.append(&mut step);
         }
 
         res
