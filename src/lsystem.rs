@@ -313,12 +313,8 @@ impl LSTranslator {
                     self.res[i].push(Box::new(cylinder));
                 }
                 LSMaterial::Texture(t) => {
-                    let cylinder = Cylinder::new(
-                        state.pos,
-                        dst,
-                        state.radius,
-                        UVMapTexture::new(t, 1.0, 0.3),
-                    );
+                    let cylinder =
+                        Cylinder::new(state.pos, dst, state.radius, UVMapTexture::new(t, 1.0, 0.3));
                     self.res[i].push(Box::new(cylinder));
                 }
             };
@@ -387,18 +383,27 @@ impl LSTranslator {
 
         self.compute_res_size(values);
 
-        for val in values {
+        let mut i = 0;
+        let len = values.len();
+        while i < len {
+            let val = values[i];
             match val {
                 'f' | 'F' => {
-                    let dst = self.compute_dst(&state);
+                    let start_state = state;
+                    let mut dst = self.compute_dst(&state);
+                    state.pos = dst;
+                    while i + 1 < len && (values[i + 1] == 'f' || values[i + 1] == 'F') {
+                        dst = self.compute_dst(&state);
+                        state.pos = dst;
+                        i += 1;
+                    }
                     if !in_leaf {
-                        self.add_edge(&state, dst)
+                        self.add_edge(&start_state, dst)
                     } else {
                         if state.obj_index >= self.trunk as usize {
                             leaf.push(dst)
                         }
                     }
-                    state.pos = dst;
                 }
                 '@' => {
                     if state.obj_index >= self.trunk as usize {
@@ -434,6 +439,7 @@ impl LSTranslator {
                 _ => (),
                 c => panic!("Unallowed char {}", c),
             }
+            i += 1;
         }
 
         self.res

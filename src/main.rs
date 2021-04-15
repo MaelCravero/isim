@@ -150,7 +150,7 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (1000, 1000);
+    let (res_x, res_y) = (500, 500);
     let cam = scene::Camera::new(
         Point(4.0, 0.0, -1.0),
         Point(0.0, 0.0, 20.0),
