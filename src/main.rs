@@ -150,7 +150,7 @@ fn generate_multiple_plants(args: &Vec<String>) -> crate::scene::ObjectContainer
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
-    let (res_x, res_y) = (500, 500);
+    let (res_x, res_y) = (900, 900);
     let cam = scene::Camera::new(
         Point(4.0, 0.0, -1.0),
         Point(0.0, 0.0, 20.0),
@@ -211,11 +211,16 @@ fn main() {
     //)));
 
     let is_gif = args[1].contains("gif");
+    let is_growth = args[1].contains("growth");
 
     let scene = scene::Scene::new(
         cam,
         lights,
-        if is_gif { objs } else { plants.pop().unwrap() },
+        if is_growth {
+            objs
+        } else {
+            plants.pop().unwrap()
+        },
     );
 
     let mut engine = engine::Engine::new(scene);
@@ -229,18 +234,25 @@ fn main() {
     //engine.set_intersect();
 
     if is_gif {
-        /*let res = engine.travelling(
-            &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
-            36,
-        );*/
-        let res = engine.render_growth(
-            &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
-            //&mut |_| (),
-            9,
-            plants,
-        );
-        save_gif(&args[1], &res);
+        if is_growth {
+            println!("Rendering growth");
+            let res = engine.render_growth(
+                &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
+                //&mut |_| (),
+                9,
+                plants,
+            );
+            save_gif(&args[1], &res);
+        } else {
+            println!("Rendering travelling");
+            let res = engine.travelling(
+                &mut |c| c.rotate_around_center_of_view(10.0f64.to_radians()),
+                36,
+            );
+            save_gif(&args[1], &res);
+        }
     } else {
+        println!("Rendering image");
         let image = engine.render();
 
         save_image(&args[1], &image);
